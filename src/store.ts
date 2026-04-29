@@ -36,6 +36,7 @@ interface AppState {
   // Node management
   addNode: (nodeType: PromptNodeType, position?: { x: number; y: number }) => void;
   updateNodeContent: (nodeId: string, content: string) => void;
+  updateNodeField: (nodeId: string, fieldId: string, value: string) => void;
   updateNodeEnabled: (nodeId: string, enabled: boolean) => void;
   setNodeState: (nodeId: string, state: PromptNodeState) => void;
   toggleNodeBypassed: (nodeIds: string[]) => void;
@@ -238,6 +239,24 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       nodes: get().nodes.map((n) =>
         n.id === nodeId ? { ...n, data: { ...n.data, content } } : n,
+      ),
+    });
+  },
+
+  updateNodeField: (nodeId, fieldId, value) => {
+    set({
+      nodes: get().nodes.map((n) =>
+        n.id === nodeId
+          ? {
+              ...n,
+              data: {
+                ...n.data,
+                fields: n.data.fields?.map((f) =>
+                  f.id === fieldId ? { ...f, value } : f
+                ),
+              },
+            }
+          : n
       ),
     });
   },
