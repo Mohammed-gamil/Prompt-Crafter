@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Content-Security-Policy
+      ─────────────────────────────────────────────────────────────────
+      default-src 'self'          — block everything not explicitly listed
+      script-src  'self'          — no inline scripts, no eval()
+      style-src   'self' 'unsafe-inline'  — Tailwind injects inline styles at runtime
+      connect-src 'self' https:   — fetch() allowed to HTTPS endpoints only (blocks http:// APIs)
+      img-src     'self' data:    — React Flow uses data: URIs for minimap
+      font-src    'self'
+      object-src  'none'          — block Flash / plugins entirely
+      base-uri    'self'          — prevent base-tag injection
+      form-action 'self'          — no cross-origin form submissions
+    -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Crafter | Vanguard Neural Architecture</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

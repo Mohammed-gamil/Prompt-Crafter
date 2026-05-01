@@ -1,18 +1,19 @@
-/* App styles are managed via Tailwind utility classes */
+/* Vanguard-tier Edge Choreography */
 
 .react-flow__edge-path {
-  stroke-width: 2.5;
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.3));
+  transition: all 0.7s var(--ease-vanguard);
 }
 
 .react-flow__edge.animated path {
-  stroke-dasharray: 8;
-  animation: dashdraw 0.5s linear infinite;
+  stroke-dasharray: 12;
+  animation: vanguard-flow 1.2s linear infinite;
 }
 
-@keyframes dashdraw {
+@keyframes vanguard-flow {
   from {
-    stroke-dashoffset: 16;
+    stroke-dashoffset: 24;
   }
   to {
     stroke-dashoffset: 0;
@@ -21,6 +22,13 @@
 
 .react-flow__edge.selected .react-flow__edge-path {
   stroke: #6366f1;
-  stroke-width: 3.5;
-  filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.5));
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
 }
+
+/* Precise Global Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar choreography already in index.css */

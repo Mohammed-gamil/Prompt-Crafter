@@ -6,6 +6,7 @@ import type { PaletteItem, PromptNodeType } from '../../types';
 import CustomNodeForm from './CustomNodeForm';
 import SearchBar from '../molecules/SearchBar';
 import PaletteNodeItem from '../molecules/PaletteNodeItem';
+import Badge from '../atoms/Badge';
 
 const CATEGORY_META = [
   { key: 'core',           label: 'Core Nodes',     icon: '◆' },
@@ -17,7 +18,6 @@ const CATEGORY_META = [
 
 type CategoryKey = typeof CATEGORY_META[number]['key'];
 
-// Map a category to a short badge label for search results
 const CATEGORY_BADGE: Record<string, string> = {
   core:           'CORE',
   'spec-kit':     'SPEC',
@@ -52,18 +52,15 @@ export default function Sidebar() {
   const [search, setSearch]                     = useState('');
   const [showCustomForm, setShowCustomForm]     = useState(false);
 
-  // Auto-expand My Nodes whenever items are imported
   useEffect(() => {
     if (customPaletteItems.length > 0) setExpandedCategory('custom');
   }, [customPaletteItems.length]);
 
-  // All items merged — custom items land in their declared category
   const allItems = useMemo(
     () => [...PALETTE_ITEMS, ...customPaletteItems],
     [customPaletteItems],
   );
 
-  // Dynamic domain list derived from all domain-library items (handles imported packs)
   const allDomains = useMemo(() => {
     const seen = new Set<string>();
     return allItems
@@ -77,7 +74,6 @@ export default function Sidebar() {
     [addNode],
   );
 
-  // Count helpers for header badges
   const countFor = useCallback(
     (key: CategoryKey) => {
       if (key === 'custom') return customPaletteItems.length;
@@ -104,167 +100,128 @@ export default function Sidebar() {
     : null;
 
   return (
-    <div className="w-72 bg-[#13131d] border-r border-gray-800 flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <div className="px-4 py-4 border-b border-gray-800">
-        <h1 className="text-lg font-bold text-white flex items-center gap-2">
-          <span className="text-indigo-400">⬡</span>
-          Prompt Crafter
-        </h1>
-        <p className="text-[11px] text-gray-500 mt-1">Node-based prompt compiler</p>
-      </div>
+    <div className="m-6 w-85 double-bezel relative z-20 flex flex-col overflow-hidden h-[calc(100vh-3rem)] pointer-events-auto">
+      <div className="double-bezel-inner flex flex-col">
+        {/* Header */}
+        <div className="px-8 py-10 flex-shrink-0">
+          <Badge label="Protocol v1.0" color="#6366f1" className="mb-4" />
+          <h1 className="text-3xl font-black text-white flex items-center gap-3 tracking-tighter leading-none">
+            <span className="text-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]">⬡</span>
+            Crafter
+          </h1>
+          <p className="text-[10px] text-gray-500 mt-4 font-mono uppercase tracking-[0.3em] opacity-40 leading-relaxed">Spatial Node Compiler</p>
+        </div>
 
-      {/* Search */}
-      <div className="px-3 pt-3 pb-1">
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search nodes…"
-        />
-      </div>
+        {/* Search */}
+        <div className="px-6 pb-6 flex-shrink-0">
+          <div className="relative group">
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Query components…"
+            />
+          </div>
+        </div>
 
-      {/* Node Palette */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-        {searchResults ? (
-          /* ── Search results ── */
-          searchResults.length === 0 ? (
-            <p className="text-[11px] text-gray-600 px-2 py-4 text-center">
-              No nodes match &ldquo;{search}&rdquo;
-            </p>
-          ) : (
-            <div className="space-y-1">
-              {searchResults.map((item) => (
-                <PaletteNodeItem
-                  key={item.nodeType}
-                  label={item.label}
-                  nodeId={item.nodeType}
-                  color={item.color}
-                  description={item.description}
-                  badge={CATEGORY_BADGE[item.category] ?? item.category}
-                  domain={item.domain}
-                  onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
-                  onDelete={
-                    item._deletable
-                      ? () => removeCustomPaletteItem(item.nodeType as string)
-                      : undefined
-                  }
-                />
-              ))}
+        {/* Node Palette */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 custom-scrollbar scroll-smooth">
+          {searchResults ? (
+            <div className="space-y-2">
+              {searchResults.length === 0 ? (
+                <div className="flex flex-col items-center py-20 opacity-20">
+                  <div className="text-4xl mb-4 text-white">∅</div>
+                  <p className="text-[10px] font-mono tracking-widest uppercase text-white">Null Set</p>
+                </div>
+              ) : (
+                searchResults.map((item, i) => (
+                  <div key={item.nodeType} style={{ animationDelay: `${i * 30}ms` }} className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
+                    <PaletteNodeItem
+                      label={item.label}
+                      nodeId={item.nodeType}
+                      color={item.color}
+                      description={item.description}
+                      badge={CATEGORY_BADGE[item.category] ?? item.category}
+                      domain={item.domain}
+                      onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
+                      onDelete={item._deletable ? () => removeCustomPaletteItem(item.nodeType as string) : undefined}
+                    />
+                  </div>
+                ))
+              )}
             </div>
-          )
-        ) : (
-          /* ── Categorised palette ── */
-          CATEGORY_META.map((cat) => {
-            const count = countFor(cat.key);
-            return (
-              <div key={cat.key}>
-                <button
-                  onClick={() =>
-                    setExpandedCategory(expandedCategory === cat.key ? '' : cat.key)
-                  }
-                  className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-gray-400 hover:text-white transition-colors rounded"
-                >
-                  <span className="flex items-center gap-1.5">
-                    {cat.icon} {cat.label}
-                    <span className="text-[9px] bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded-full font-mono">
-                      {count}
+          ) : (
+            CATEGORY_META.map((cat, catIdx) => {
+              const count = countFor(cat.key);
+              const isExpanded = expandedCategory === cat.key;
+              return (
+                <div key={cat.key} className="animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both" style={{ animationDelay: `${catIdx * 80}ms` }}>
+                  <button
+                    onClick={() => setExpandedCategory(isExpanded ? '' : cat.key)}
+                    className={`w-full flex items-center justify-between px-4 py-3 text-[11px] font-black transition-all duration-500 ease-vanguard rounded-xl group ${
+                      isExpanded ? 'bg-white/5 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]' : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3 uppercase tracking-[0.2em]">
+                      <span className={`text-xs transition-all duration-700 ${isExpanded ? 'scale-125 rotate-12 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]' : 'opacity-30 group-hover:opacity-100'}`}>{cat.icon}</span> 
+                      {cat.label}
                     </span>
-                  </span>
-                  <span className="text-[10px]">{expandedCategory === cat.key ? '▾' : '▸'}</span>
-                </button>
+                    <span className="text-[9px] bg-white/5 text-gray-500 px-2.5 py-1 rounded-full font-mono border border-white/5 opacity-50 font-bold">
+                      {count.toString().padStart(2, '0')}
+                    </span>
+                  </button>
 
-                {expandedCategory === cat.key && (
-                  <div className="space-y-1 mt-1">
-
-                    {/* ── My Nodes: ALL customPaletteItems grouped by their category ── */}
-                    {cat.key === 'custom' && (() => {
-                      if (customPaletteItems.length === 0 && !showCustomForm) {
-                        return (
-                          <p className="text-[10px] text-gray-600 px-3 py-2">
-                            No custom nodes yet. Create one below or import a pack.
-                          </p>
-                        );
-                      }
-
-                      // Group by category
-                      const groups = new Map<string, PaletteItem[]>();
-                      for (const item of customPaletteItems) {
-                        const grp = item.category === 'custom' ? 'Created' :
-                          item.category === 'domain-library' ? `Library · ${item.domain ?? 'Imported'}` :
-                          item.category === 'smart' ? 'Smart' :
-                          item.category === 'core' ? 'Core' : item.category;
-                        if (!groups.has(grp)) groups.set(grp, []);
-                        groups.get(grp)!.push(item);
-                      }
-
-                      return (
+                  {isExpanded && (
+                    <div className="mt-4 ml-2 space-y-2 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700">
+                      {cat.key === 'custom' && (
                         <>
-                          {Array.from(groups.entries()).map(([grpLabel, items]) => (
-                            <div key={grpLabel}>
-                              {groups.size > 1 && (
-                                <p className="text-[9px] text-gray-600 uppercase tracking-widest px-3 pt-2 pb-1">
-                                  {grpLabel}
-                                </p>
-                              )}
-                              {items.map((item) => (
-                                <PaletteNodeItem
-                                  key={item.nodeType}
-                                  label={item.label}
-                                  nodeId={item.nodeType}
-                                  color={item.color}
-                                  description={item.description}
-                                  onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
-                                  onDelete={() => removeCustomPaletteItem(item.nodeType as string)}
-                                />
-                              ))}
-                            </div>
-                          ))}
+                          {customPaletteItems.length === 0 && !showCustomForm ? (
+                            <p className="text-[10px] text-gray-600 px-3 py-4 font-medium italic opacity-50 leading-relaxed">No bespoke components detected. Import a pack or initialize a new node.</p>
+                          ) : (
+                            customPaletteItems.map((item) => (
+                              <PaletteNodeItem
+                                key={item.nodeType}
+                                label={item.label}
+                                nodeId={item.nodeType}
+                                color={item.color}
+                                description={item.description}
+                                onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
+                                onDelete={() => removeCustomPaletteItem(item.nodeType as string)}
+                              />
+                            ))
+                          )}
                           {showCustomForm ? (
-                            <CustomNodeForm
-                              onSave={(item) => {
-                                addCustomPaletteItem(item);
-                                setShowCustomForm(false);
-                              }}
-                              onCancel={() => setShowCustomForm(false)}
-                            />
+                            <div className="p-4 bg-white/[0.02] border border-white/[0.05] rounded-2xl mt-4 animate-in zoom-in-95 duration-500">
+                              <CustomNodeForm
+                                onSave={(item) => { addCustomPaletteItem(item); setShowCustomForm(false); }}
+                                onCancel={() => setShowCustomForm(false)}
+                              />
+                            </div>
                           ) : (
                             <button
                               onClick={() => setShowCustomForm(true)}
-                              className="w-full mt-1 flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 border border-dashed border-indigo-800 hover:border-indigo-600 rounded-md transition-colors"
+                              className="w-full mt-4 flex items-center justify-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 hover:text-indigo-300 bg-indigo-500/5 border border-dashed border-indigo-500/20 hover:border-indigo-500/40 rounded-xl transition-all duration-500 ease-vanguard"
                             >
-                              <span className="text-base leading-none">+</span> New Custom Node
+                              <span className="text-lg leading-none">+</span> New Component
                             </button>
                           )}
                         </>
-                      );
-                    })()}
+                      )}
 
-                    {/* ── Domain Library: grouped by domain (built-in + imported) ── */}
-                    {cat.key === 'domain-library' &&
-                      allDomains.map((domain) => {
-                        const domainItems = allItems.filter(
-                          (p) => p.category === 'domain-library' && p.domain === domain,
-                        );
+                      {cat.key === 'domain-library' && allDomains.map((domain) => {
+                        const domainItems = allItems.filter(p => p.category === 'domain-library' && p.domain === domain);
+                        const isDomExpanded = expandedDomain === domain;
                         return (
-                          <div key={domain}>
+                          <div key={domain} className="mb-2">
                             <button
-                              onClick={() =>
-                                setExpandedDomain(expandedDomain === domain ? null : domain)
-                              }
-                              className="w-full flex items-center justify-between px-3 py-1 text-[11px] text-gray-500 hover:text-gray-300 transition-colors"
+                              onClick={() => setExpandedDomain(isDomExpanded ? null : domain)}
+                              className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-gray-500 hover:text-gray-300 uppercase tracking-widest transition-all"
                             >
                               <span>{domain}</span>
-                              <span className="flex items-center gap-1 text-[9px] text-gray-600">
-                                {domainItems.length}
-                                <span className="ml-1">{expandedDomain === domain ? '▾' : '▸'}</span>
-                              </span>
+                              <span className={`text-[10px] transition-transform duration-500 ${isDomExpanded ? 'rotate-90 text-indigo-400' : 'opacity-30'}`}>▸</span>
                             </button>
-                            {expandedDomain === domain &&
-                              domainItems.map((item) => {
-                                const isDeletable = customPaletteItems.some(
-                                  (c) => c.nodeType === item.nodeType,
-                                );
-                                return (
+                            {isDomExpanded && (
+                              <div className="mt-2 space-y-1.5 animate-in slide-in-from-left-4 duration-500">
+                                {domainItems.map((item) => (
                                   <PaletteNodeItem
                                     key={item.nodeType}
                                     label={item.label}
@@ -272,84 +229,70 @@ export default function Sidebar() {
                                     color={item.color}
                                     description={item.description}
                                     onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
-                                    onDelete={
-                                      isDeletable
-                                        ? () => removeCustomPaletteItem(item.nodeType as string)
-                                        : undefined
-                                    }
                                   />
-                                );
-                              })}
+                                ))}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
 
-                    {/* ── Core / Smart / Spec-Kit: built-in + imported items ── */}
-                    {(cat.key === 'core' || cat.key === 'smart' || cat.key === 'spec-kit') &&
-                      allItems
-                        .filter((p) => {
+                      {(cat.key === 'core' || cat.key === 'smart' || cat.key === 'spec-kit') && allItems
+                        .filter(p => {
                           const isSpecKit = p.nodeType.toString().startsWith('speckit_');
-                          if (cat.key === 'spec-kit') return isSpecKit;
-                          return p.category === cat.key && !isSpecKit;
+                          return cat.key === 'spec-kit' ? isSpecKit : (p.category === cat.key && !isSpecKit);
                         })
-                        .map((item) => {
-                          const isDeletable = customPaletteItems.some(
-                            (c) => c.nodeType === item.nodeType,
-                          );
-                          return (
-                            <PaletteNodeItem
-                              key={item.nodeType}
-                              label={item.label}
-                              nodeId={item.nodeType}
-                              color={item.color}
-                              description={item.description}
-                              onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
-                              onDelete={
-                                isDeletable
-                                  ? () => removeCustomPaletteItem(item.nodeType as string)
-                                  : undefined
-                              }
-                            />
-                          );
-                        })}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
+                        .map((item) => (
+                          <PaletteNodeItem
+                            key={item.nodeType}
+                            label={item.label}
+                            nodeId={item.nodeType}
+                            color={item.color}
+                            description={item.description}
+                            onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
+                          />
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
 
-      {/* Compile Button */}
-      <div className="px-4 py-3 border-t border-gray-800">
-        <button
-          onClick={() => {
-            // Auto-snapshot when opening the output panel
-            if (!outputPanelOpen && nodes.length > 0) {
-              const { xml } = compile(nodes, edges);
-              saveVersion(undefined, xml);
-            }
-            setOutputPanelOpen(!outputPanelOpen);
-          }}
-          title="Ctrl+Enter"
-          className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-all text-white ${
-            !outputPanelOpen && warningCount > 0
-              ? 'bg-amber-600 hover:bg-amber-500 ring-1 ring-amber-500/40'
-              : 'bg-indigo-600 hover:bg-indigo-500'
-          }`}
-        >
-          <span className="flex items-center justify-center gap-2">
-            <span>{outputPanelOpen ? '✕  Close Output' : '▶  Compile Prompt'}</span>
+        {/* Compile Button: Vanguard Island CTA */}
+        <div className="px-6 py-8 border-t border-white/[0.03] flex-shrink-0">
+          <button
+            onClick={() => {
+              if (!outputPanelOpen && nodes.length > 0) {
+                const { xml } = compile(nodes, edges);
+                saveVersion(undefined, xml);
+              }
+              setOutputPanelOpen(!outputPanelOpen);
+            }}
+            className={`group w-full relative flex items-center justify-between pl-6 pr-2 py-2 rounded-full font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-700 ease-vanguard overflow-hidden shadow-2xl ${
+              outputPanelOpen 
+                ? 'bg-white/10 text-white' 
+                : warningCount > 0 
+                  ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-amber-500/10' 
+                  : 'bg-indigo-600 text-white shadow-indigo-500/20'
+            }`}
+          >
+            <span className="relative z-10">{outputPanelOpen ? 'Deactivate Output' : 'Initialize Compile'}</span>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center relative z-10 transition-transform duration-700 ease-vanguard group-hover:scale-110 ${
+              outputPanelOpen ? 'bg-white/10 text-white' : 'bg-black/20 text-white'
+            }`}>
+              {outputPanelOpen ? '✕' : '▶'}
+            </div>
             {!outputPanelOpen && warningCount > 0 && (
-              <span className="bg-white/20 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                {warningCount}
-              </span>
+              <div className="absolute top-0 right-10 flex items-center h-full">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              </div>
             )}
-          </span>
-          <span className="block text-[9px] font-normal opacity-40 mt-0.5 font-mono">Ctrl+Enter</span>
-        </button>
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-

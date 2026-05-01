@@ -142,7 +142,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Project rules and stack definitions.',
     color: '#eab308',
     defaultContent: 'Project constitution loaded.',
-    // @ts-ignore - Extending PaletteItem with PromptNodeData properties
+    // @ts-expect-error - Extending PaletteItem with PromptNodeData properties
     portType: { out: ['RULES'] },
     fields: [
       { id: 'stack', label: 'Tech Stack', value: '', type: 'text', placeholder: 'e.g. React, Supabase' },
@@ -156,7 +156,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Features and user stories.',
     color: '#3b82f6',
     defaultContent: 'Specifications defined.',
-    // @ts-ignore
+    // @ts-expect-error
     portType: { in: ['RULES'], out: ['SPECS'] },
     fields: [
       { id: 'stories', label: 'User Stories', value: '', type: 'textarea' },
@@ -170,7 +170,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Implementation plan and architecture.',
     color: '#10b981',
     defaultContent: 'Implementation plan generated.',
-    // @ts-ignore
+    // @ts-expect-error
     portType: { in: ['SPECS', 'RULES'], out: ['ARCH'] },
     fields: [
       { id: 'arch', label: 'Architecture', value: '', type: 'textarea' },
@@ -184,7 +184,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Granular execution tasks.',
     color: '#8b5cf6',
     defaultContent: 'Tasks list finalized.',
-    // @ts-ignore
+    // @ts-expect-error
     portType: { in: ['ARCH', 'RULES'], out: ['TASKS'] },
     fields: [{ id: 'tasks', label: 'Task List', value: '', type: 'textarea' }],
   },
