@@ -264,22 +264,22 @@ export default function AppLayout() {
 
   return (
     <ReactFlowProvider>
-      <div className="relative h-screen w-screen bg-ink-950 overflow-hidden font-sans">
+      <div className="relative h-screen w-screen bg-gray-950 overflow-hidden font-sans">
         <VersionHistoryPanel />
-        
-        {/* Vanguard Layout: Detached Sidebar Island */}
+
+        {/* Sidebar */}
         <div className="absolute inset-0 z-20 pointer-events-none flex">
           <Sidebar />
-          
+
           <div className="flex-1 relative flex flex-col pointer-events-none">
             <Toolbar onOpenTemplates={() => setTemplatesOpen(true)} />
-            
+
             {/* Dynamic Panel Anchors */}
             <div className="flex-1 pointer-events-none" />
-            
+
             <TestPanel open={testPanelOpen} onClose={() => setTestPanelOpen(false)} />
           </div>
-          
+
           <OutputPanel />
         </div>
 
@@ -293,22 +293,21 @@ export default function AppLayout() {
         {/* Modals */}
         {templatesOpen && <TemplatesModal onClose={() => setTemplatesOpen(false)} />}
 
-        {/* Floating test button: Island Architecture */}
+        {/* Floating test button */}
         {!testPanelOpen && (
-          <div className="fixed bottom-10 right-10 z-30 animate-in fade-in zoom-in duration-1000 ease-vanguard">
+          <div className="fixed bottom-10 right-10 z-30">
             <button
               onClick={() => setTestPanelOpen(true)}
-              className="group relative flex items-center gap-4 pl-6 pr-2 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] hover:bg-white/[0.06] transition-all duration-700 ease-vanguard active:scale-95"
+              className="flex items-center gap-3 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 shadow-lg hover:bg-gray-700 transition-colors active:scale-95"
               title="Test compiled prompt against an LLM"
             >
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/80 group-hover:translate-x-0.5 transition-transform duration-700">Test Protocol</span>
-              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all duration-700 ease-vanguard group-hover:scale-110 group-hover:rotate-12">
-                <span className="text-xs animate-pulse">⚡</span>
+              <span className="text-xs font-semibold text-gray-200">Test Protocol</span>
+              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
+                <span className="text-xs text-white">⚡</span>
               </div>
             </button>
           </div>
         )}
       </div>
     </ReactFlowProvider>
-  );
-}
+  );}

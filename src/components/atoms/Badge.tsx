@@ -10,10 +10,10 @@ interface BadgeProps {
 export default function Badge({ label, color, className = '' }: BadgeProps) {
   return (
     <span
-      className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold leading-none uppercase tracking-[0.15em] border ${
-        !color ? 'bg-white/5 text-gray-400 border-white/5' : 'border-white/5'
+      className={`text-[10px] px-2 py-0.5 rounded font-medium leading-none uppercase tracking-wide border ${
+        !color ? 'bg-gray-800 text-gray-400 border-gray-700' : 'border-transparent'
       } ${className}`}
-      style={color ? { backgroundColor: `${color}15`, color: `${color}cc` } : undefined}
+      style={color ? { backgroundColor: `${color}20`, color: `${color}` } : undefined}
     >
       {label}
     </span>

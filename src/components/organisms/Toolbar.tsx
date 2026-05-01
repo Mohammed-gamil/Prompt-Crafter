@@ -135,25 +135,25 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
   };
 
   return (
-    <div className="absolute top-6 right-6 z-30 flex flex-col items-end gap-3 pointer-events-none">
+    <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-none">
       {/* Hidden file inputs */}
       <input ref={workflowRef} type="file" accept=".json" className="hidden" onChange={handleImportWorkflow} />
       <input ref={packRef}     type="file" accept=".json" className="hidden" onChange={handleImportPack} />
 
-      {/* Templates + History group: Vanguard Floating Island */}
-      <div className="flex gap-1 p-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl shadow-2xl pointer-events-auto transition-all duration-700 hover:bg-white/[0.05] group">
+      {/* Templates + History group */}
+      <div className="flex items-center gap-1 p-1 rounded-md bg-gray-900 border border-gray-800 shadow-md pointer-events-auto"> 
         <ToolbarButton
           icon="✦"
           label="Templates"
           onClick={() => onOpenTemplates?.()}
         />
-        <div className="w-[1px] h-4 bg-white/10 my-auto mx-1" />
+        <div className="w-[1px] h-4 bg-gray-700 mx-1" />
         <ToolbarButton
           icon="🕐"
           label={historyOpen ? 'Hide History' : 'History'}
           onClick={() => setHistoryOpen(!historyOpen)}
         />
-        <div className="w-[1px] h-4 bg-white/10 my-auto mx-1" />
+        <div className="w-[1px] h-4 bg-gray-700 mx-1" />
         <ToolbarButton
           icon="🔗"
           label="Share"
@@ -162,8 +162,8 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
         />
       </div>
 
-      {/* Workflow group: Secondary Island */}
-      <div className="flex gap-1 p-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] backdrop-blur-md shadow-xl pointer-events-auto opacity-60 hover:opacity-100 transition-all duration-700">
+      {/* Workflow group */}
+      <div className="flex items-center gap-1 p-1 rounded-md bg-gray-800 border border-gray-700 shadow pointer-events-auto opacity-75 hover:opacity-100 transition-opacity"> 
         <ToolbarButton
           icon="↓"
           label="Import"
@@ -177,8 +177,8 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
         />
       </div>
 
-      {/* Node pack group: Tertiary Island */}
-      <div className="flex gap-1 p-1.5 rounded-full bg-white/[0.01] border border-white/[0.03] backdrop-blur-sm shadow-lg pointer-events-auto opacity-40 hover:opacity-80 transition-all duration-700">
+      {/* Node pack group */}
+      <div className="flex items-center gap-1 p-1 rounded-md bg-gray-800 border border-gray-700 shadow pointer-events-auto opacity-50 hover:opacity-100 transition-opacity">  
         <ToolbarButton
           icon="📦"
           label="Library In"
@@ -192,5 +192,4 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
         />
       </div>
     </div>
-  );
-}
+  );}

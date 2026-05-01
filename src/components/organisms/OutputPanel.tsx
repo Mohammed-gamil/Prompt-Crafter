@@ -7,7 +7,6 @@ import type { OutputFormat } from '../../types';
 import FormatSelector from '../molecules/FormatSelector';
 import AuditStamp from '../molecules/AuditStamp';
 import WarningList from '../molecules/WarningList';
-import Badge from '../atoms/Badge';
 
 export default function OutputPanel() {
   const nodes = useAppStore((s) => s.nodes);
@@ -34,78 +33,70 @@ export default function OutputPanel() {
       style={{
         width: outputPanelOpen ? '520px' : '0px',
         flexShrink: 0,
-        transition: 'all 0.8s var(--ease-vanguard)',
+        transition: 'all 0.3s ease-out',
         opacity: outputPanelOpen ? 1 : 0,
-        transform: outputPanelOpen ? 'translateX(0) scale(1)' : 'translateX(20px) scale(0.98)',
-        filter: outputPanelOpen ? 'blur(0)' : 'blur(8px)',
+        transform: outputPanelOpen ? 'translateX(0)' : 'translateX(20px)',
       }}
-      className="m-6 relative z-30 pointer-events-auto overflow-hidden"
+      className="m-4 relative z-30 pointer-events-auto overflow-hidden bg-gray-900 border border-gray-800 rounded-lg shadow-xl flex flex-col h-[calc(100vh-2rem)]"
     >
-      <div className="h-full double-bezel flex flex-col">
-        <div className="double-bezel-inner flex flex-col overflow-hidden bg-ink-900/80 backdrop-blur-2xl">
-          {/* Header */}
-          <div className="flex items-center justify-between px-8 py-6 border-b border-white/[0.03] bg-white/[0.01]">
-            <div>
-              <Badge label="Protocol Stream" color="#6366f1" className="mb-2" />
-              <h2 className="text-xl font-black text-white uppercase tracking-tighter">Compiled Output</h2>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleCopy}
-                className="group relative flex items-center gap-3 pl-4 pr-1.5 py-1.5 rounded-full bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 transition-all duration-700 ease-vanguard hover:bg-indigo-600/20 active:scale-95"
-              >
-                <span className="text-[10px] font-black uppercase tracking-widest">{copied ? 'Copied' : 'Copy'}</span>
-                <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[10px]">
-                  {copied ? '✓' : '⧉'}
-                </div>
-              </button>
-              <button
-                onClick={() => setOutputPanelOpen(false)}
-                className="text-xs w-8 h-8 flex items-center justify-center rounded-full border border-white/5 hover:bg-white/10 text-gray-500 transition-all duration-700 ease-vanguard"
-              >
-                ✕
-              </button>
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-gray-800 bg-gray-900 flex-shrink-0">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Compiled Output</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-600/10 border border-blue-500/20 text-blue-400 hover:bg-blue-600/20 transition-colors"
+          >
+            <span className="text-xs font-semibold">{copied ? 'Copied' : 'Copy'}</span>
+            <span className="text-xs">{copied ? '✓' : '⧉'}</span>
+          </button>
+          <button
+            onClick={() => setOutputPanelOpen(false)}
+            className="text-gray-500 hover:text-gray-300 transition-colors px-2 py-1"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <FormatSelector value={format} onChange={setFormat} />
+        <AuditStamp audit={audit} />
+        <WarningList warnings={warnings} />
+
+        {/* Advisor summary */}
+        <div className="px-6 py-4 border-b border-gray-800 bg-gray-900/50">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Diagnostic Advisor</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-blue-400 font-medium">Score:</span>
+              <span className="text-xs text-white font-bold bg-blue-500/20 px-2 py-0.5 rounded">{advice.quality_score}</span>
             </div>
           </div>
+          {advice.issues.length > 0 ? (
+            <ul className="space-y-2">
+              {advice.issues.slice(0, 3).map((issue, i) => (
+                <li key={i} className="text-[11px] text-gray-300 flex gap-2 items-start">
+                  <span className="text-amber-500 mt-0.5">●</span>
+                  <span>
+                    <span className="uppercase text-[9px] font-bold text-gray-500 tracking-wider mr-2">[{issue.category}]</span>
+                    {issue.description}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[11px] text-green-500 font-medium">No structural anomalies detected.</p>
+          )}
+        </div>
 
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <FormatSelector value={format} onChange={setFormat} />
-            <AuditStamp audit={audit} />
-            <WarningList warnings={warnings} />
-
-            {/* Advisor summary */}
-            <div className="px-8 py-5 border-b border-white/[0.03] bg-white/[0.01]">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Diagnostic Advisor</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono text-indigo-400 font-bold">CORE_SCORE:</span>
-                  <span className="text-[11px] font-mono text-white font-bold bg-indigo-500/20 px-2 py-0.5 rounded-full">{advice.quality_score}</span>
-                </div>
-              </div>
-              {advice.issues.length > 0 ? (
-                <ul className="space-y-2">
-                  {advice.issues.slice(0, 3).map((issue, i) => (
-                    <li key={i} className="text-[11px] text-gray-400 flex gap-3 animate-in fade-in slide-in-from-left-4 duration-700" style={{ animationDelay: `${i * 100}ms` }}>
-                      <span className="text-amber-500 font-mono mt-1">⬢</span>
-                      <span>
-                        <span className="uppercase text-[9px] font-black text-gray-600 tracking-widest mr-2">[{issue.category}]</span>
-                        {issue.description}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-[11px] text-emerald-500/80 font-bold tracking-tight uppercase">No structural anomalies detected.</p>
-              )}
-            </div>
-
-            {/* Output */}
-            <div className="flex-1 overflow-auto p-8 custom-scrollbar">
-              <pre className="text-[12px] leading-[1.8] text-gray-400 font-mono whitespace-pre-wrap break-words selection:bg-indigo-500/30 tracking-tight">
-                {displayText}
-              </pre>
-            </div>
-          </div>
+        {/* Output */}
+        <div className="flex-1 overflow-auto p-6 custom-scrollbar bg-gray-950">
+          <pre className="text-xs leading-relaxed text-gray-300 font-mono whitespace-pre-wrap break-words selection:bg-blue-500/30">
+            {displayText}
+          </pre>
         </div>
       </div>
     </div>

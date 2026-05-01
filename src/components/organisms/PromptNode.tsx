@@ -83,16 +83,16 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
 
   return (
     <div
-      className="p-1 rounded-[1.5rem] bg-white/[0.03] border border-white/[0.08] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] backdrop-blur-sm transition-all duration-700 ease-vanguard"
+      className="p-px rounded-lg bg-gray-800 border border-gray-700 shadow-md backdrop-blur-sm"
       style={{
         opacity: stateOpacity,
         minWidth: 240,
       }}
     >
-      <div 
-        className="rounded-[calc(1.5rem-0.25rem)] overflow-hidden bg-ink-900 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex flex-col"
+      <div
+        className="rounded-[calc(0.5rem-1px)] overflow-hidden bg-gray-900 flex flex-col"
         style={{
-          border: state === 'error' ? '1px solid #ef4444' : state === 'active' ? `1px solid ${color}44` : '1px solid rgba(255,255,255,0.05)',
+          border: state === 'error' ? '1px solid #ef4444' : state === 'active' ? `1px solid ${color}44` : '1px solid transparent',
           borderStyle: state === 'bypassed' ? 'dashed' : 'solid',
         }}
       >
@@ -100,38 +100,38 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
           isVisible={selected}
           minWidth={240}
           minHeight={140}
-          lineClassName="!border-indigo-500/40"
-          handleClassName="!w-2 !h-2 !bg-indigo-500 !border-0 !rounded-full"
+          lineClassName="!border-blue-500/40"
+          handleClassName="!w-2 !h-2 !bg-blue-500 !border-0 !rounded-full"
         />
 
         {/* Title bar */}
         <div
-          className="flex items-center justify-between px-4 py-3 border-b border-white/[0.03]"
-          style={{ backgroundColor: `${color}08` }}
+          className="flex items-center justify-between px-3 py-2 border-b border-gray-800"
+          style={{ backgroundColor: `${color}10` }}
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_12px_rgba(255,255,255,0.4)] animate-pulse" style={{ backgroundColor: color }} />
-            <span className="text-[10px] font-black tracking-[0.1em] text-white/80 uppercase">{label}</span>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+            <span className="text-xs font-semibold text-gray-200">{label}</span>
             <Badge label={badgeLabel} color={color} />
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={onToggleBypass}
-              className={`text-[9px] font-bold w-6 h-6 flex items-center justify-center rounded-full border border-white/5 hover:bg-white/10 transition-all duration-500 ease-vanguard ${state === 'bypassed' ? 'bg-white/10 text-white' : 'text-gray-600'}`}
+              className={`text-xs font-bold w-5 h-5 flex items-center justify-center rounded hover:bg-gray-700 transition-colors ${state === 'bypassed' ? 'bg-gray-700 text-white' : 'text-gray-400'}`}
               title="Toggle bypass"
             >
               B
             </button>
             <button
               onClick={onToggleMute}
-              className={`text-[9px] font-bold w-6 h-6 flex items-center justify-center rounded-full border border-white/5 hover:bg-white/10 transition-all duration-500 ease-vanguard ${state === 'muted' ? 'bg-white/10 text-white' : 'text-gray-600'}`}
+              className={`text-xs font-bold w-5 h-5 flex items-center justify-center rounded hover:bg-gray-700 transition-colors ${state === 'muted' ? 'bg-gray-700 text-white' : 'text-gray-400'}`}
               title="Toggle mute"
             >
               M
             </button>
             <button
               onClick={onRemove}
-              className="text-[10px] w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-500/10 text-red-500/40 hover:text-red-400 transition-all duration-500 ease-vanguard"
+              className="text-xs w-5 h-5 flex items-center justify-center rounded hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
               title="Remove node"
             >
               ✕
@@ -140,22 +140,22 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
         </div>
 
         {/* Description */}
-        <div className="px-4 py-2.5 bg-white/[0.01]">
-          <p className="text-[10px] text-gray-500 leading-relaxed font-medium tracking-tight">{description}</p>
+        <div className="px-3 py-2 bg-gray-800/50">
+          <p className="text-[11px] text-gray-400 leading-tight">{description}</p>
           {errorMessage && (
-            <p className="text-[9px] text-red-400 mt-2 font-mono bg-red-500/5 px-2 py-1 rounded border border-red-500/10">{errorMessage}</p>
+            <p className="text-[10px] text-red-400 mt-1.5 font-mono bg-red-500/10 px-1.5 py-1 rounded border border-red-500/20">{errorMessage}</p>
           )}
         </div>
 
         {/* Content area */}
-        <div className="px-4 pb-4 pt-2 flex-1 flex flex-col gap-4">
+        <div className="px-3 pb-3 pt-2 flex-1 flex flex-col gap-3">
           {isLogicNode ? (
             <CoTToggle toggled={toggled ?? false} color={color} onToggle={onToggleCoT} />
           ) : fields && fields.length > 0 ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {fields.map((field) => (
-                <div key={field.id} className="flex flex-col gap-2">
-                  <label className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.2em] ml-1">
+                <div key={field.id} className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
                     {field.label}
                   </label>
                   {field.type === 'textarea' ? (
@@ -164,8 +164,8 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                       onChange={(e) => onFieldChange(field.id, e.target.value)}
                       rows={3}
                       placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}...`}
-                      className="w-full bg-ink-950/50 border border-white/[0.05] rounded-xl px-3 py-2.5 text-[11px] text-gray-300 resize-y focus:border-indigo-500/30 focus:outline-none placeholder-gray-800 transition-all duration-700 ease-vanguard font-sans shadow-inner"
-                      style={{ borderLeft: field.value ? `2px solid ${color}88` : undefined }}
+                      className="w-full bg-gray-950 border border-gray-700 rounded-md px-2 py-1.5 text-[11px] text-gray-200 resize-y focus:border-blue-500 focus:outline-none placeholder-gray-600 transition-colors font-sans"
+                      style={{ borderLeft: field.value ? `2px solid ${color}aa` : undefined }}
                     />
                   ) : (
                     <input
@@ -173,8 +173,8 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                       value={field.value}
                       onChange={(e) => onFieldChange(field.id, e.target.value)}
                       placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}...`}
-                      className="w-full bg-ink-950/50 border border-white/[0.05] rounded-xl px-3 py-2 text-[11px] text-gray-300 focus:border-indigo-500/30 focus:outline-none placeholder-gray-800 transition-all duration-700 ease-vanguard font-sans shadow-inner"
-                      style={{ borderLeft: field.value ? `2px solid ${color}88` : undefined }}
+                      className="w-full bg-gray-950 border border-gray-700 rounded-md px-2 py-1.5 text-[11px] text-gray-200 focus:border-blue-500 focus:outline-none placeholder-gray-600 transition-colors font-sans"
+                      style={{ borderLeft: field.value ? `2px solid ${color}aa` : undefined }}
                     />
                   )}
                 </div>
@@ -187,8 +187,8 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                 onChange={onContentChange}
                 rows={3}
                 placeholder={`Enter ${label.toLowerCase()} content...`}
-                className="w-full flex-1 bg-ink-950/50 border border-white/[0.05] rounded-xl px-3 py-2.5 text-[11px] text-gray-300 resize-y focus:border-indigo-500/30 focus:outline-none placeholder-gray-800 transition-all duration-700 ease-vanguard font-sans shadow-inner"
-                style={{ borderLeft: content ? `2px solid ${color}88` : undefined }}
+                className="w-full flex-1 bg-gray-950 border border-gray-700 rounded-md px-2 py-1.5 text-[11px] text-gray-200 resize-y focus:border-blue-500 focus:outline-none placeholder-gray-600 transition-colors font-sans"
+                style={{ borderLeft: content ? `2px solid ${color}aa` : undefined }}
               />
               {nodeType === 'role' && (
                 <RolePresets onSelect={(c) => updateContent(id, c)} />
@@ -198,21 +198,20 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
         </div>
       </div>
 
-      {/* Micro-precise Handles */}
+      {/* Handles */}
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2 !h-2 !rounded-full !border !border-white/20 !shadow-lg transition-transform duration-500 hover:scale-150"
-        style={{ borderColor: targetColor, backgroundColor: 'var(--color-ink-950)' }}
+        className="!w-3 !h-3 !rounded-full !border-[1.5px] !border-gray-900 transition-transform hover:scale-125"
+        style={{ backgroundColor: targetColor }}
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-2 !h-2 !rounded-full !border !border-white/20 !shadow-lg transition-transform duration-500 hover:scale-150"
-        style={{ borderColor: sourceColor, backgroundColor: 'var(--color-ink-950)' }}
+        className="!w-3 !h-3 !rounded-full !border-[1.5px] !border-gray-900 transition-transform hover:scale-125"
+        style={{ backgroundColor: sourceColor }}
       />
     </div>
-  );
-}
+  );}
 
 export default memo(PromptNodeComponent);
