@@ -253,20 +253,20 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 shadow-lg transition-all hover:!scale-125 hover:!bg-zinc-700"
+        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 shadow-lg transition-all hover:!scale-110 hover:!bg-zinc-700 !z-50"
         style={{ borderColor: targetColor }}
       >
-        <div className="absolute inset-0 flex items-center justify-center opacity-40">
+        <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
            <div className="w-1 h-1 rounded-full bg-white" />
         </div>
       </Handle>
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 shadow-lg transition-all hover:!scale-125 hover:!bg-zinc-700"
+        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 shadow-lg transition-all hover:!scale-110 hover:!bg-zinc-700 !z-50"
         style={{ borderColor: sourceColor }}
       >
-        <div className="absolute inset-0 flex items-center justify-center opacity-40">
+        <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
            <div className="w-1 h-1 rounded-full bg-white" />
         </div>
       </Handle>
