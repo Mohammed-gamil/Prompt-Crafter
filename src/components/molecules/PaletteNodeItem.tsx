@@ -1,5 +1,6 @@
-/** Draggable palette node row. Exports DRAG_TYPE used by the canvas drop handler. */
+import { Plus, Trash, Info } from '@phosphor-icons/react';
 
+/** Draggable palette node row. Exports DRAG_TYPE used by the canvas drop handler. */
 export const DRAG_TYPE = 'application/prompt-crafter-node';
 
 interface PaletteNodeItemProps {
@@ -34,37 +35,46 @@ export default function PaletteNodeItem({
         onClick={onAdd}
         draggable
         onDragStart={handleDragStart}
-        className="w-full text-left px-3 py-2.5 rounded-md border border-gray-800 bg-gray-900/50 hover:bg-gray-800 hover:border-gray-700 hover:shadow-sm transition-colors group cursor-grab active:cursor-grabbing"
+        className="w-full text-left px-3 py-3 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900 hover:border-zinc-700 hover:shadow-lg transition-all duration-300 group cursor-grab active:cursor-grabbing active:scale-[0.98]"
         title={description}
       >
-        <div className="flex items-center gap-2.5">
-          <div className="w-2 h-2 rounded-full flex-shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: color }} />   
-          <span className="text-xs font-semibold text-gray-300 group-hover:text-white truncate transition-colors">{label}</span>
-          <div className="ml-auto flex items-center gap-2 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+             <div className="w-2 h-2 rounded-full flex-shrink-0 transition-transform group-hover:scale-125" style={{ backgroundColor: color }} />   
+             <div className="absolute inset-0 w-2 h-2 rounded-full opacity-30 blur-[2px]" style={{ backgroundColor: color }} />
+          </div>
+          <span className="text-[11px] font-bold text-zinc-400 group-hover:text-white truncate transition-colors duration-300">{label}</span>
+          <div className="ml-auto flex items-center gap-2 flex-shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
             {badge && (
               <span
-                className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider border border-transparent"
-                style={{ backgroundColor: `${color}15`, color }}
+                className="text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest border border-zinc-800"
+                style={{ backgroundColor: `${color}10`, color }}
               >
                 {badge}
               </span>
             )}
-            <span className="text-[9px] text-gray-500 font-mono tracking-tight">{nodeId}</span>
+            <div className="bg-zinc-800 p-1 rounded">
+               <Plus size={10} className="text-zinc-500" />
+            </div>
           </div>
         </div>
-        <p className="text-[11px] text-gray-500 mt-1.5 ml-4.5 leading-snug font-medium opacity-80 group-hover:opacity-100 transition-opacity">
-          {domain ? <span className="text-blue-400/80 uppercase text-[9px] font-bold tracking-wider">{domain} · </span> : null}
-          {description}
-        </p>
+        <div className="flex items-start gap-2 mt-2 ml-1">
+           <Info size={10} className="text-zinc-700 mt-0.5" />
+           <p className="text-[10px] text-zinc-500 leading-relaxed font-medium opacity-80 group-hover:opacity-100 transition-opacity flex-1">
+             {domain ? <span className="text-blue-400/80 uppercase text-[8px] font-bold tracking-widest">{domain} · </span> : null}
+             {description}
+           </p>
+        </div>
       </button>
       {onDelete && (
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 text-[10px] w-5 h-5 flex items-center justify-center rounded hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
+          className="absolute right-2 top-3 opacity-0 group-hover/row:opacity-100 text-[10px] w-6 h-6 flex items-center justify-center rounded-lg bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all"
           title="Remove from palette"
         >
-          ✕
+          <Trash size={12} weight="bold" />
         </button>
       )}
     </div>
-  );}
+  );
+}

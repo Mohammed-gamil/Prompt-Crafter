@@ -1,5 +1,5 @@
 interface ToolbarButtonProps {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   onClick: () => void;
   disabled?: boolean;
@@ -11,11 +11,11 @@ export default function ToolbarButton({ icon, label, onClick, disabled = false }
       onClick={onClick}
       disabled={disabled}
       title={label}
-      className="group flex items-center gap-2 pl-2 pr-1.5 py-1 rounded text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      className="group flex items-center gap-2 pl-2 pr-1 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 active:scale-95"
     >
-      <span className="hidden sm:inline">{label}</span>
-      <div className="w-5 h-5 rounded flex items-center justify-center bg-gray-800 text-gray-300">   
-        <span>{icon}</span>
+      <span className="hidden sm:inline transition-colors">{label}</span>
+      <div className="w-6 h-6 rounded-md flex items-center justify-center bg-zinc-800 text-zinc-400 group-hover:bg-blue-600/20 group-hover:text-blue-400 transition-all">   
+        {icon}
       </div>
     </button>
   );

@@ -8,6 +8,14 @@ import {
   type NodeTypes,
   useReactFlow,
 } from '@xyflow/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Lightning, 
+  TerminalWindow, 
+  Selection, 
+  Cube, 
+  CursorClick 
+} from '@phosphor-icons/react';
 import '@xyflow/react/dist/style.css';
 
 import { useAppStore, type WorkflowClipboard } from '../../store';
@@ -26,6 +34,8 @@ import { DRAG_TYPE } from '../molecules/PaletteNodeItem';
 const nodeTypes: NodeTypes = {
   promptNode: PromptNodeComponent,
 };
+
+const SPRING_TRANSITION: any = { type: 'spring', stiffness: 300, damping: 30 };
 
 function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
   const nodes = useAppStore((s) => s.nodes);
@@ -87,7 +97,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
         void navigator.clipboard.writeText(wrapped).catch(() => {
           // Clipboard write can fail on some browser contexts; internal clipboard still works.
         });
-        toast(`Copied ${payload.nodes.length} node${payload.nodes.length === 1 ? '' : 's'}`, 'success', 1500);
+        toast(`Copied ${payload.nodes.length} unit${payload.nodes.length === 1 ? '' : 's'}`, 'success', 1500);
         return;
       }
 
@@ -113,7 +123,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
               };
               const pasted = pasteSelection(payload, { x: 40, y: 40 });
               if (pasted.length > 0) {
-                toast(`Pasted ${pasted.length} node${pasted.length === 1 ? '' : 's'}`, 'success', 1500);
+                toast(`Pasted ${pasted.length} unit${pasted.length === 1 ? '' : 's'}`, 'success', 1500);
                 return;
               }
             }
@@ -123,7 +133,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
 
           const pasted = pasteSelection(undefined, { x: 40, y: 40 });
           if (pasted.length > 0) {
-            toast(`Pasted ${pasted.length} node${pasted.length === 1 ? '' : 's'}`, 'success', 1500);
+            toast(`Pasted ${pasted.length} unit${pasted.length === 1 ? '' : 's'}`, 'success', 1500);
           }
         })();
       }
@@ -133,7 +143,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
   }, [copySelection, duplicateNodes, pasteSelection, setOutputPanelOpen, toggleNodeBypassed, toggleNodeMuted]);
 
   const defaultEdgeOptions = useMemo(
-    () => ({ animated: true, style: { stroke: '#6366f1', strokeWidth: 2 } }),
+    () => ({ animated: true, style: { stroke: '#3b82f6', strokeWidth: 2 } }),
     [],
   );
   const renderedEdges = useMemo(() => {
@@ -148,7 +158,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
         return {
           ...e,
           animated: false,
-          style: { ...(e.style ?? {}), stroke: '#6b7280', strokeWidth: 2, strokeDasharray: '2 5', opacity: 0.5 },
+          style: { ...(e.style ?? {}), stroke: '#3f3f46', strokeWidth: 2, strokeDasharray: '2 5', opacity: 0.5 },
         };
       }
 
@@ -156,14 +166,14 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
         return {
           ...e,
           animated: false,
-          style: { ...(e.style ?? {}), stroke: '#94a3b8', strokeWidth: 2, strokeDasharray: '5 4' },
+          style: { ...(e.style ?? {}), stroke: '#3b82f6', strokeWidth: 2, strokeDasharray: '5 4', opacity: 0.7 },
         };
       }
 
       return {
         ...e,
         animated: true,
-        style: { ...(e.style ?? {}), stroke: '#6366f1', strokeWidth: 2 },
+        style: { ...(e.style ?? {}), stroke: '#3b82f6', strokeWidth: 2 },
       };
     });
   }, [edges, nodes]);
@@ -202,45 +212,69 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
           defaultEdgeOptions={defaultEdgeOptions}
           proOptions={proOptions}
           fitView
-          className="bg-ink-950"
+          className="bg-zinc-950"
         >
-          <Background color="#1a1a24" gap={24} size={1} />
+          <Background color="#27272a" gap={24} size={1} />
           <Controls
-            className="!bg-ink-900 !border-white/5 !rounded !shadow-2xl [&>button]:!bg-ink-900 [&>button]:!border-white/5 [&>button]:!text-gray-500 [&>button:hover]:!bg-white/5"
+            className="!bg-zinc-900 !border-zinc-800 !rounded-xl !shadow-2xl [&>button]:!bg-zinc-900 [&>button]:!border-zinc-800 [&>button]:!text-zinc-500 [&>button:hover]:!bg-zinc-800 [&>button:hover]:!text-zinc-300"
           />
           <MiniMap
             nodeColor={(node) => {
               const data = node.data as { color?: string };
-              return data.color ?? '#6366f1';
+              return data.color ?? '#3b82f6';
             }}
-            className="!bg-ink-900 !border-white/5 !rounded !shadow-2xl"
+            className="!bg-zinc-900 !border-zinc-800 !rounded-xl !shadow-2xl"
             maskColor="rgba(0, 0, 0, 0.7)"
           />
         </ReactFlow>
 
         {/* Empty state */}
-        {nodes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center max-w-sm px-6">
-              <div className="text-5xl mb-8 opacity-5 text-indigo-500 font-bold">⬡</div>
-              <h3 className="text-white/80 text-sm font-bold uppercase tracking-[0.2em] mb-6">System Initialization</h3>
-              <div className="space-y-4 text-left">
-                {[
-                  { n: '01', text: 'Deploy components from the tactical sidebar' },
-                  { n: '02', text: 'Configure Role, Domain and Mission parameters' },
-                  { n: '03', text: 'Execute Compile (Ctrl+Enter) to generate protocol' },
-                ].map((step) => (
-                  <div key={step.n} className="flex items-start gap-4 group">
-                    <span className="flex-shrink-0 w-6 h-6 rounded border border-white/10 bg-white/5 text-indigo-400 text-[9px] font-mono font-bold flex items-center justify-center tracking-tighter shadow-inner">
-                      {step.n}
-                    </span>
-                    <p className="text-gray-500 text-[11px] leading-relaxed font-medium uppercase tracking-tight">{step.text}</p>
-                  </div>
-                ))}
+        <AnimatePresence>
+          {nodes.length === 0 && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            >
+              <div className="text-center max-w-sm px-6">
+                <div className="relative inline-block mb-10">
+                   <div className="text-6xl text-blue-500/20 font-bold">
+                      <Cube size={64} weight="duotone" />
+                   </div>
+                   <motion.div 
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 4 }}
+                      className="absolute inset-0 text-blue-400 blur-xl flex items-center justify-center"
+                   >
+                      <Cube size={64} weight="fill" />
+                   </motion.div>
+                </div>
+                <h3 className="text-white/80 text-lg font-bold uppercase tracking-[0.2em] mb-8">System Initialized</h3>
+                <div className="space-y-4 text-left">
+                  {[
+                    { n: '01', text: 'Deploy units from tactical sidebar', icon: CursorClick },
+                    { n: '02', text: 'Configure mission parameters', icon: Selection },
+                    { n: '03', text: 'Initialize compilation protocol', icon: TerminalWindow },
+                  ].map((step) => (
+                    <motion.div 
+                      key={step.n} 
+                      className="flex items-start gap-4 p-3 rounded-xl bg-zinc-900/40 border border-zinc-800/50 backdrop-blur-sm shadow-inner"
+                    >
+                      <span className="flex-shrink-0 w-6 h-6 rounded-lg border border-zinc-700 bg-zinc-800 text-blue-400 text-[10px] font-mono font-bold flex items-center justify-center tracking-tighter">
+                        {step.n}
+                      </span>
+                      <div className="flex-1">
+                         <p className="text-zinc-400 text-[11px] leading-relaxed font-bold uppercase tracking-wide">{step.text}</p>
+                      </div>
+                      <step.icon size={16} className="text-zinc-700" />
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -257,24 +291,21 @@ export default function AppLayout() {
     if (shared) {
       loadWorkflow(shared.nodes, shared.edges);
       clearShareHash();
-      toast('Shared workflow loaded from URL', 'success');
+      toast('Shared protocol loaded from hash', 'success');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <ReactFlowProvider>
-      <div className="relative h-screen w-screen bg-gray-950 overflow-hidden font-sans">
+      <div className="relative h-screen w-screen bg-zinc-950 overflow-hidden font-sans">
         <VersionHistoryPanel />
 
-        {/* Sidebar */}
+        {/* Tactical UI Layers */}
         <div className="absolute inset-0 z-20 pointer-events-none flex">
           <Sidebar />
 
           <div className="flex-1 relative flex flex-col pointer-events-none">
-            <Toolbar onOpenTemplates={() => setTemplatesOpen(true)} />
-
-            {/* Dynamic Panel Anchors */}
             <div className="flex-1 pointer-events-none" />
 
             <TestPanel open={testPanelOpen} onClose={() => setTestPanelOpen(false)} />
@@ -283,7 +314,7 @@ export default function AppLayout() {
           <OutputPanel />
         </div>
 
-        {/* Main Canvas: Edge-to-Edge */}
+        {/* Main Canvas Layer */}
         <div className="absolute inset-0 z-10">
           <FlowCanvas onOpenTemplates={() => setTemplatesOpen(true)} />
         </div>
@@ -293,21 +324,30 @@ export default function AppLayout() {
         {/* Modals */}
         {templatesOpen && <TemplatesModal onClose={() => setTemplatesOpen(false)} />}
 
-        {/* Floating test button */}
-        {!testPanelOpen && (
-          <div className="fixed bottom-10 right-10 z-30">
-            <button
-              onClick={() => setTestPanelOpen(true)}
-              className="flex items-center gap-3 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 shadow-lg hover:bg-gray-700 transition-colors active:scale-95"
-              title="Test compiled prompt against an LLM"
+        {/* Floating Action Button */}
+        <AnimatePresence>
+          {!testPanelOpen && (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={SPRING_TRANSITION}
+              className="fixed bottom-10 right-10 z-30"
             >
-              <span className="text-xs font-semibold text-gray-200">Test Protocol</span>
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
-                <span className="text-xs text-white">⚡</span>
-              </div>
-            </button>
-          </div>
-        )}
+              <button
+                onClick={() => setTestPanelOpen(true)}
+                className="group flex items-center gap-4 pl-6 pr-2 py-2 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl hover:bg-zinc-800 hover:border-zinc-700 transition-all active:scale-95 pointer-events-auto"
+                title="Initialize LLM Neural Link"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">Test Protocol</span>
+                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)] group-hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all">
+                  <Lightning size={16} weight="fill" className="text-white animate-pulse" />
+                </div>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </ReactFlowProvider>
-  );}
+  );
+}

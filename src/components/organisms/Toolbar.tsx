@@ -1,4 +1,14 @@
 import { useRef } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  FileArrowDown, 
+  FileArrowUp, 
+  ShareNetwork, 
+  Clock, 
+  Layout, 
+  Archive, 
+  Export 
+} from '@phosphor-icons/react';
 import { toast } from '../../toast';
 import { useAppStore } from '../../store';
 import type { PaletteItem } from '../../types';
@@ -56,6 +66,8 @@ interface NodePackFile {
   kind: 'node-pack';
   nodes: PaletteItem[];
 }
+
+const SPRING_TRANSITION: any = { type: 'spring', stiffness: 400, damping: 30 };
 
 export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => void }) {
   const nodes = useAppStore((s) => s.nodes);
@@ -135,27 +147,32 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
   };
 
   return (
-    <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-none">
+    <motion.div 
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={SPRING_TRANSITION}
+      className="absolute top-4 right-4 z-30 flex flex-col items-end gap-3 pointer-events-none"
+    >
       {/* Hidden file inputs */}
       <input ref={workflowRef} type="file" accept=".json" className="hidden" onChange={handleImportWorkflow} />
       <input ref={packRef}     type="file" accept=".json" className="hidden" onChange={handleImportPack} />
 
-      {/* Templates + History group */}
-      <div className="flex items-center gap-1 p-1 rounded-md bg-gray-900 border border-gray-800 shadow-md pointer-events-auto"> 
+      {/* Main group */}
+      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 shadow-2xl pointer-events-auto"> 
         <ToolbarButton
-          icon="✦"
+          icon={<Layout size={16} weight="duotone" />}
           label="Templates"
           onClick={() => onOpenTemplates?.()}
         />
-        <div className="w-[1px] h-4 bg-gray-700 mx-1" />
+        <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
         <ToolbarButton
-          icon="🕐"
+          icon={<Clock size={16} weight="bold" />}
           label={historyOpen ? 'Hide History' : 'History'}
           onClick={() => setHistoryOpen(!historyOpen)}
         />
-        <div className="w-[1px] h-4 bg-gray-700 mx-1" />
+        <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
         <ToolbarButton
-          icon="🔗"
+          icon={<ShareNetwork size={16} weight="bold" />}
           label="Share"
           onClick={handleShare}
           disabled={nodes.length === 0}
@@ -163,14 +180,14 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
       </div>
 
       {/* Workflow group */}
-      <div className="flex items-center gap-1 p-1 rounded-md bg-gray-800 border border-gray-700 shadow pointer-events-auto opacity-75 hover:opacity-100 transition-opacity"> 
+      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800 shadow-xl pointer-events-auto backdrop-blur-md"> 
         <ToolbarButton
-          icon="↓"
+          icon={<FileArrowDown size={16} weight="bold" />}
           label="Import"
           onClick={() => workflowRef.current?.click()}
         />
         <ToolbarButton
-          icon="↑"
+          icon={<FileArrowUp size={16} weight="bold" />}
           label="Export"
           onClick={handleExportWorkflow}
           disabled={nodes.length === 0}
@@ -178,18 +195,19 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
       </div>
 
       {/* Node pack group */}
-      <div className="flex items-center gap-1 p-1 rounded-md bg-gray-800 border border-gray-700 shadow pointer-events-auto opacity-50 hover:opacity-100 transition-opacity">  
+      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900/60 border border-zinc-800 shadow-lg pointer-events-auto opacity-80 hover:opacity-100 transition-opacity">  
         <ToolbarButton
-          icon="📦"
+          icon={<Archive size={16} weight="bold" />}
           label="Library In"
           onClick={() => packRef.current?.click()}
         />
         <ToolbarButton
-          icon="📤"
+          icon={<Export size={16} weight="bold" />}
           label="Library Out"
           onClick={handleExportPack}
           disabled={customPaletteItems.length === 0}
         />
       </div>
-    </div>
-  );}
+    </motion.div>
+  );
+}
