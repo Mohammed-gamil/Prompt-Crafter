@@ -180,7 +180,10 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
   const proOptions = useMemo(() => ({ hideAttribution: true }), []);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes(DRAG_TYPE)) return;
+    // Robust check for drag types (e.dataTransfer.types is not always an array)
+    const isOurType = e.dataTransfer.types && Array.from(e.dataTransfer.types).includes(DRAG_TYPE);
+    if (!isOurType) return;
+    
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
   }, []);
@@ -197,7 +200,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
   );
 
   return (
-    <div className="flex-1 relative flex flex-col overflow-hidden">
+    <div className="h-full w-full relative flex flex-col overflow-hidden">
       <div className="flex-1 relative">
         <Toolbar onOpenTemplates={onOpenTemplates} />
         <ReactFlow
@@ -315,7 +318,7 @@ export default function AppLayout() {
         </div>
 
         {/* Main Canvas Layer */}
-        <div className="absolute inset-0 z-10">
+        <div className="absolute inset-0 z-10 flex flex-col">
           <FlowCanvas onOpenTemplates={() => setTemplatesOpen(true)} />
         </div>
 
