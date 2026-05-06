@@ -1,302 +1,101 @@
-# Prompt Crafter
+# 🧩 Prompt Crafter
 
-Prompt Crafter is a **node-based prompt compiler** built with React + TypeScript.
-You compose prompt instructions visually as a directed graph, and the app compiles that graph into structured system instructions (XML by default), with audit metrics and warnings.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)](https://vitejs.dev/)
 
-This README explains the **actual current implementation** in this repository (not an aspirational roadmap).
-
----
-
-## What this app does
-
-At a high level:
-
-1. You drag prompt nodes (Domain, Role, Mission, Guardrails, Smart processors, etc.) onto a canvas.
-2. You connect nodes to define execution/assembly order.
-3. The compiler converts enabled nodes into structured XML blocks.
-4. The output panel shows:
-   - compiled prompt text,
-   - audit stats (word count, active nodes, RAM chars, CoT on/off, safety flag),
-   - warnings (missing required nodes, safety flags, length checks).
-5. You can copy output as XML / Markdown / JSON / plain text.
-6. You can save/import/export workflows, share via URL hash, and test prompts against an OpenAI-compatible API.
+**The utilitarian IDE for advanced prompt engineering.** Stop fighting with walls of text. Start building prompts visually as logical, audited graphs.
 
 ---
 
-## Current feature set (implemented now)
+## 🚀 Why Prompt Crafter?
 
-### Visual prompt graph editor
+Prompt Engineering is evolving from "chatting" to "programming." **Prompt Crafter** bridges that gap by providing a spatial, node-based workspace where you can architect complex system instructions with the precision of an engineer and the clarity of a designer.
 
-- Built on `@xyflow/react` (React Flow).
-- Custom node type: `promptNode`.
-- Drag from sidebar or click to add nodes.
-- Connect nodes with animated edges.
-- Per-node controls:
-  - enable/disable node,
-  - remove node,
-  - edit text content (except logic toggle node).
-
-### Node libraries
-
-- **Core nodes**: domain, role, context RAM, mission/goal, guardrail, logic/reasoning, format.
-- **Domain library nodes**: web, AI/automation, security/devops, data science/ML, writing/content, marketing.
-- **Smart nodes**: refiner, validator, ReAct pattern, few-shot injector, JSON schema output.
-- **Custom nodes**:
-  - create in-app,
-  - import/export as node packs,
-  - persist in localStorage.
-
-### Templates
-
-Starter templates currently included:
-
-- Customer Support Bot
-- Code Review Assistant
-- RAG Research Assistant
-- Marketing Copy Generator
-
-Selecting a template replaces current canvas content.
-
-### Compiler + output formats
-
-- Compiler entry point: `src/compiler.ts` (`compile(nodes, edges)`).
-- Advanced envelope API: `compileEnvelope(nodes, edges)` for structured COMPILE-mode JSON output.
-- Produces XML wrapped in `<system_instructions>...</system_instructions>`.
-- Output can be converted to:
-  - XML,
-  - Markdown,
-  - JSON,
-  - plain text.
-
-### Validation and warnings
-
-- Required checks for enabled canvas nodes:
-  - domain (or any enabled domain-library node),
-  - role,
-  - mission_goal.
-- Safety pattern scan (keyword-based) over enabled node content.
-- On safety hits, offending text is redacted and a guardrail block is injected near the top of compiled output.
-- Word-count warning when compiled body exceeds 300 words (excluding RAM content).
-- Optional validator node (`SMART-02`) adds explicit validator flags.
-- Warnings are structured (`code`, `severity`, `message`, `node_id`) and shown in the output panel.
-
-### Versioning / snapshots
-
-- Local snapshots of nodes + edges + compiled XML.
-- Auto-snapshot when opening output panel with non-empty canvas.
-- Manual save, restore, delete.
-- Max stored versions: 30.
-
-### Import / export / share
-
-- Export workflow JSON (`kind: "workflow"`).
-- Import workflow JSON.
-- Export custom nodes JSON (`kind: "node-pack"`).
-- Import node pack JSON (duplicates skipped by `nodeType`).
-- Share current workflow through URL hash encoding (`#share=...`).
-- On load, app auto-imports valid shared hash, then clears hash from URL.
-
-### Prompt test panel (live API call)
-
-- Uses compiled XML as **system message**.
-- Sends chat requests to an OpenAI-compatible endpoint (`/chat/completions`).
-- Configurable in UI:
-  - base URL,
-  - model id,
-  - API key.
-- Settings are stored locally in browser localStorage.
-
-### Prompt advisor (ADVISE mode)
-
-- Built-in advisor (`src/advisor.ts`) analyzes compiled XML against prompt-engineering heuristics.
-- Output panel now shows an advisor score and top actionable issues.
-- Advisor report includes missing-node suggestions and targeted rewrites.
+- **Visual Logic**: Connect Domain, Role, and Mission nodes like code blocks.
+- **Smart Auditing**: Real-time quality scores, safety scans, and token-aware metrics.
+- **Battle-Tested Templates**: Start with RAG assistants, code reviewers, or marketing bots.
+- **Live Testing**: Integrated OpenAI-compatible test panel to iterate in real-time.
 
 ---
 
-## How compilation actually works
+## ✨ Key Features
 
-Core compiler flow in `src/compiler.ts`:
-
-1. **Filter enabled nodes**.
-2. **Run required-node checks** on enabled nodes.
-3. **Run safety scan** against unsafe regex patterns.
-4. **Detect post-processors**:
-   - `SMART-01` refiner,
-   - `SMART-02` validator.
-5. **Sort nodes by graph order** using topological sort (Kahn algorithm):
-   - respects edge dependency order,
-   - stable for zero in-degree nodes,
-   - cycle members are appended (not dropped).
-6. **Compile each node** into a typed XML block.
-7. **Apply tone conversion post-pass** if `SMART-01` is enabled.
-8. **Compute audit metrics** and generate warnings.
-
-Audit now includes:
-
-- `qualityScore` (0–100)
-- `completenessScore` (0–100)
-- `specificityScore` (0–100)
-- `safetyFlag` (boolean)
-
-### Node-to-XML mapping (key examples)
-
-- `domain` → `<domain_context>`
-- `role` → `<role_identity>`
-- `mission_goal` → `<task_objective>`
-- `context_ram` → `<technical_memory>`
-- `guardrail` → `<guardrail>`
-- `format` → `<output_blueprint>`
-- `logic_reasoning` (toggled on) → `<reasoning_directive>` (fixed instruction body)
-- `SMART-04` → `<examples>`
-- `SMART-05` → `<output_schema>`
-- domain-library items → `<domain_rule ...>`
-- custom items → `<custom_block ...>`
-
-### Tone conversion behavior
-
-The app replaces aggressive instruction phrases with calmer alternatives (regex map) both:
-
-- at per-node compilation time for many blocks, and
-- globally on final XML when `SMART-01` is active.
+| Feature | Description |
+| :--- | :--- |
+| **Node Graph Editor** | Powered by `@xyflow/react`. Drag, connect, and compile. |
+| **Smart Processors** | Automatic tone conversion, refiners, and validators. |
+| **Safety Shield** | Built-in heuristic scans for jailbreak and safety patterns. |
+| **Multi-Format Export** | Compile to XML (default), Markdown, JSON, or Plain Text. |
+| **Snapshot History** | 30-version local history to never lose a winning prompt. |
+| **Zero-Config Testing** | Test against any OpenAI-compatible API directly in the UI. |
 
 ---
 
-## Architecture overview
+## 🛠️ Tech Stack
 
-### Tech stack
-
-- React 18 + TypeScript
-- Vite 5
-- Zustand (global app state)
-- React Flow (`@xyflow/react`) for canvas/graph UX
-- Tailwind CSS (via Vite plugin)
-
-### Main modules
-
-- `src/store.ts`
-  - central Zustand store,
-  - node/edge mutations,
-  - custom palette persistence,
-  - version history persistence,
-  - workflow loading and ID remapping.
-
-- `src/components/templates/AppLayout.tsx`
-  - top-level UI composition,
-  - canvas + sidebar + output panel + history + test panel,
-  - initial shared-hash import.
-
-- `src/compiler.ts`
-  - graph-aware prompt compilation,
-  - warnings and audit metadata.
-
-- `src/formatConverter.ts`
-  - XML converters to Markdown/JSON/plain text.
-
-- `src/templates.ts`
-  - starter templates and instantiation logic.
-
-- `src/shareUrl.ts`
-  - URL hash serialization/deserialization for sharing.
-
-- `src/components/organisms/TestPanel.tsx`
-  - API settings UI,
-  - chat request/response loop against OpenAI-compatible endpoint.
-
-### State and persistence
-
-Persisted localStorage keys:
-
-- `prompt-crafter:custom-nodes`
-- `prompt-crafter:versions`
-- `prompt-crafter:api-settings`
-
-Data stored in browser only (no server in this repo).
+- **Frontend**: React 18, TypeScript, Zustand (State)
+- **Visuals**: React Flow (Graphing), Tailwind CSS (Styling)
+- **Build**: Vite (Speed)
+- **Branding**: Utilitarian IDE aesthetic (No "AI Slop")
 
 ---
 
-## Security notes (current behavior)
+## 🚦 Quick Start
 
-- JSON imports use a custom reviver that strips `__proto__`, `constructor`, and `prototype` keys to reduce prototype-pollution risk.
-- Shared URL hash decoding enforces a max encoded length to avoid oversized payload freezes.
-- API base URL validation allows:
-  - `https://` for normal endpoints,
-  - `http://` only for localhost/loopback.
-
-Important: API keys are stored in localStorage and used client-side. For production use in hostile environments, a server-side proxy pattern is usually safer.
-
----
-
-## Known limitations / current state gaps
-
-This is what is currently true in the codebase:
-
-- No backend service in this repository.
-- No user auth / multi-user collaboration.
-- No automated test suite included yet.
-- Compiler safety checks are heuristic regex checks, not a full policy engine.
-- URL sharing keeps full workflow in hash; very large graphs can produce large URLs.
-- Workflow and node-pack schema validation is basic (shape checks, not strict schema library).
-
----
-
-## Run locally
-
-Requirements:
-
-- Node.js 18+
-- npm
-
-Install and start:
-
+### 1. Installation
 ```bash
+git clone https://github.com/Mohammed-gamil/Prompt-Crafter.git
+cd Prompt-Crafter
 npm install
+```
+
+### 2. Development
+```bash
 npm run dev
 ```
 
-Other scripts:
-
+### 3. Build for Production
 ```bash
 npm run build
-npm run preview
-npm run lint
 ```
 
 ---
 
-## Typical usage walkthrough
+## 🧩 How It Works: The "Compiler" Flow
 
-1. Add `Domain`, `Role`, and `Mission / Goal` nodes.
-2. Fill their content.
-3. Add optional guardrails, format node, and domain/smart nodes.
-4. Connect nodes in desired order.
-5. Click **Compile Prompt** (or `Ctrl+Enter`).
-6. Review warnings + audit stats.
-7. Copy output in desired format.
-8. Optionally test in the **Test Prompt** panel with your API key.
-9. Save a snapshot or export/share workflow.
+Prompt Crafter isn't just a UI—it's a **graph-aware compiler**.
+
+1. **Topological Sort**: Kahn's algorithm ensures nodes are assembled in the correct logical order.
+2. **XML Transformation**: Every node maps to a structured, LLM-optimized XML block.
+3. **Safety Post-Pass**: Heuristic regex scans redact sensitive text and inject guardrails.
+4. **Tone Refinement**: Optional processors rewrite aggressive instructions into optimal LLM-calm prose.
 
 ---
 
-## File map (quick orientation)
+## 🤝 Contributing
 
-- `src/components/organisms/Sidebar.tsx` — palette, search, compile action
-- `src/components/organisms/PromptNode.tsx` — node UI/editor
-- `src/components/organisms/Toolbar.tsx` — templates/history/share/import/export controls
-- `src/components/organisms/OutputPanel.tsx` — compiled output and format conversion
-- `src/components/organisms/VersionHistoryPanel.tsx` — snapshots
-- `src/components/organisms/TestPanel.tsx` — runtime prompt testing
-- `src/presets.ts` — built-in palette + role presets
-- `src/types.ts` — shared domain types
+We welcome contributions! Whether it's adding new **Smart Nodes**, improving the **Compiler**, or refining the **UI**, your help makes Prompt Crafter better for everyone.
+
+1. Fork the repo.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
 ---
 
-## License and source notes
+## ⭐ Support
 
-Role presets include material inspired by:
+If you find this tool useful, please **give it a star on GitHub**! It helps the project grow and reach more developers.
 
-- `f/awesome-chatgpt-prompts` (CC0 1.0)
-- `mustvlad/ChatGPT-System-Prompts` (MIT)
+---
 
-See comments in `src/presets.ts`.
+## 📄 License
 
+Distributed under the MIT License. See `src/presets.ts` for third-party prompt material attribution.
+
+---
+
+*Built with precision for the next generation of AI Engineers.*
