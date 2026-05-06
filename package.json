@@ -1,7 +1,8 @@
 {
   "name": "prompt-crafter",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "The utilitarian IDE for advanced prompt engineering. Visually compose, audit, and test complex system prompts as logical graphs.",
   "type": "module",
   "scripts": {
     "dev": "vite",
