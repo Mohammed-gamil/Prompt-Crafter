@@ -19,7 +19,6 @@ import type { PaletteItem, PromptNodeType } from '../../types';
 import CustomNodeForm from './CustomNodeForm';
 import SearchBar from '../molecules/SearchBar';
 import PaletteNodeItem from '../molecules/PaletteNodeItem';
-import Badge from '../atoms/Badge';
 
 const CATEGORY_META = [
   { key: 'core',           label: 'Core Nodes',     icon: Cube },
@@ -39,7 +38,7 @@ const CATEGORY_BADGE: Record<string, string> = {
   custom:         'MINE',
 };
 
-const SPRING_TRANSITION: any = { type: 'spring', stiffness: 300, damping: 30 };
+const SPRING_TRANSITION = { type: 'spring', stiffness: 300, damping: 30 } as const;
 
 export default function Sidebar() {
   const addNode               = useAppStore((s) => s.addNode);
@@ -115,27 +114,23 @@ export default function Sidebar() {
     : null;
 
   return (
-    <motion.div 
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={SPRING_TRANSITION}
-      className="m-4 w-80 bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl relative z-20 flex flex-col h-[calc(100vh-2rem)] pointer-events-auto overflow-hidden"
+    <div
+      className="m-4 w-80 bg-zinc-950 border border-zinc-800 rounded-lg relative z-20 flex flex-col h-[calc(100vh-2rem)] pointer-events-auto overflow-hidden"
     >
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="px-6 py-8 flex-shrink-0 border-b border-zinc-800 bg-gradient-to-b from-zinc-900/50 to-transparent">
-          <Badge label="Protocol v1.0" color="#3b82f6" className="mb-4" />
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3 tracking-tighter leading-none">
-            <span className="text-blue-500 flex items-center justify-center bg-blue-500/10 w-8 h-8 rounded-lg border border-blue-500/20">
-              <Cube size={20} weight="duotone" />
+        <div className="px-5 py-5 flex-shrink-0 border-b border-zinc-800">
+          <h1 className="text-base font-semibold text-white flex items-center gap-2.5">
+            <span className="text-blue-500 flex items-center justify-center bg-blue-500/10 w-7 h-7 rounded-md border border-blue-500/20">
+              <Cube size={15} weight="duotone" />
             </span>
-            Crafter
+            Prompt Crafter
           </h1>
-          <p className="text-[10px] text-zinc-500 mt-4 font-mono uppercase tracking-[0.2em] font-medium">Spatial Node Compiler</p>
+          <p className="text-[11px] text-zinc-500 mt-2">Node palette</p>
         </div>
 
         {/* Search */}
-        <div className="px-4 py-4 flex-shrink-0 border-b border-zinc-800 bg-zinc-900/20">
+        <div className="px-4 py-3 flex-shrink-0 border-b border-zinc-800">
           <div className="relative flex items-center group">
             <div className="absolute left-3 text-zinc-500 group-focus-within:text-blue-400 transition-colors pointer-events-none">
               <MagnifyingGlass size={14} weight="bold" />
@@ -143,32 +138,26 @@ export default function Sidebar() {
             <SearchBar
               value={search}
               onChange={setSearch}
-              placeholder="Query protocol units..."
+              placeholder="Search nodes..."
             />
           </div>
         </div>
 
         {/* Node Palette */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 custom-scrollbar bg-zinc-950/40">
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 custom-scrollbar">
           {searchResults ? (
-            <motion.div 
-              layout
+            <div
               className="space-y-2"
             >
               {searchResults.length === 0 ? (
-                <div className="flex flex-col items-center py-20 opacity-30">
-                  <div className="w-12 h-12 rounded-full border-2 border-dashed border-zinc-700 flex items-center justify-center mb-4">
-                    <MagnifyingGlass size={20} />
-                  </div>
-                  <p className="text-[10px] font-mono tracking-widest uppercase text-white">Null Set</p>
+                <div className="flex flex-col items-center py-16 text-zinc-600">
+                  <MagnifyingGlass size={20} />
+                  <p className="text-xs mt-3">No results</p>
                 </div>
               ) : (
-                searchResults.map((item, i) => (
-                  <motion.div 
-                    key={item.nodeType} 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.03 }}
+                searchResults.map((item) => (
+                  <div
+                    key={item.nodeType}
                   >
                     <PaletteNodeItem
                       label={item.label}
@@ -180,10 +169,10 @@ export default function Sidebar() {
                       onAdd={() => handleAdd(item.nodeType as PromptNodeType)}
                       onDelete={item._deletable ? () => removeCustomPaletteItem(item.nodeType as string) : undefined}
                     />
-                  </motion.div>
+                  </div>
                 ))
               )}
-            </motion.div>
+            </div>
           ) : (
             CATEGORY_META.map((cat) => {
               const count = countFor(cat.key);
@@ -193,17 +182,17 @@ export default function Sidebar() {
                 <div key={cat.key} className="space-y-3">
                   <button
                     onClick={() => setExpandedCategory(isExpanded ? '' : cat.key)}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold rounded-lg transition-all duration-300 group ${
-                      isExpanded ? 'bg-zinc-900 text-white border border-zinc-800 shadow-lg' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50 border border-transparent'
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-md transition-colors group ${
+                      isExpanded ? 'bg-zinc-900 text-white border border-zinc-800' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 border border-transparent'
                     }`}
                   >
-                    <span className="flex items-center gap-3 uppercase tracking-widest">
-                      <span className={`transition-transform duration-500 ${isExpanded ? 'scale-110 text-blue-400' : 'opacity-40 group-hover:opacity-100'}`}>
-                        <Icon size={16} weight={isExpanded ? "duotone" : "bold"} />
+                    <span className="flex items-center gap-2.5">
+                      <span className={`${isExpanded ? 'text-blue-400' : 'opacity-50 group-hover:opacity-100'}`}>
+                        <Icon size={15} weight={isExpanded ? "duotone" : "regular"} />
                       </span>
                       {cat.label}
                     </span>
-                    <span className="text-[9px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded-full font-mono border border-zinc-700/50">
+                    <span className="text-[10px] bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded font-mono">
                       {count.toString().padStart(2, '0')}
                     </span>
                   </button>
@@ -221,7 +210,7 @@ export default function Sidebar() {
                           {cat.key === 'custom' && (
                             <>
                               {customPaletteItems.length === 0 && !showCustomForm ? (
-                                <p className="text-[10px] text-zinc-600 px-2 py-4 font-medium italic leading-relaxed">No bespoke components detected. Initialize a new node unit.</p> 
+                                <p className="text-[11px] text-zinc-600 px-2 py-4 leading-relaxed">No custom nodes yet.</p> 
                               ) : (
                                 customPaletteItems.map((item) => (
                                   <PaletteNodeItem
@@ -236,22 +225,20 @@ export default function Sidebar() {
                                 ))
                               )}
                               {showCustomForm ? (
-                                <motion.div 
-                                  initial={{ scale: 0.95, opacity: 0 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                  className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mt-2"
+                                <div
+                                  className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg mt-2"
                                 >
                                   <CustomNodeForm
                                     onSave={(item) => { addCustomPaletteItem(item); setShowCustomForm(false); }}
                                     onCancel={() => setShowCustomForm(false)}
                                   />
-                                </motion.div>
+                                </div>
                               ) : (
                                 <button
                                   onClick={() => setShowCustomForm(true)}
-                                  className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 hover:bg-blue-500/5 border border-dashed border-blue-500/20 hover:border-blue-500/40 rounded-xl transition-all"
+                                  className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2 text-xs text-zinc-400 hover:text-zinc-200 border border-dashed border-zinc-700 hover:border-zinc-500 rounded-lg transition-colors"
                                 >
-                                  <Plus size={14} weight="bold" /> New Component
+                                  <Plus size={13} weight="bold" /> New node
                                 </button>
                               )}
                             </>
@@ -264,15 +251,14 @@ export default function Sidebar() {
                               <div key={domain} className="mb-2">
                                 <button
                                   onClick={() => setExpandedDomain(isDomExpanded ? null : domain)}
-                                  className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 uppercase tracking-widest transition-all"
+                                  className="w-full flex items-center justify-between px-2 py-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors"
                                 >
                                   <span>{domain}</span>
-                                  <motion.span 
-                                    animate={{ rotate: isDomExpanded ? 90 : 0 }}
-                                    className={`transition-colors ${isDomExpanded ? 'text-blue-400' : 'opacity-30'}`}
+                                  <span
+                                    className={`${isDomExpanded ? 'text-blue-400' : 'opacity-40'}`}
                                   >
                                     <CaretRight size={10} weight="bold" />
-                                  </motion.span>
+                                  </span>
                                 </button>
                                 <AnimatePresence>
                                   {isDomExpanded && (
@@ -326,7 +312,7 @@ export default function Sidebar() {
         </div>
 
         {/* Compile Button */}
-        <div className="p-6 border-t border-zinc-800 bg-zinc-900/50 flex-shrink-0">
+        <div className="p-4 border-t border-zinc-800 flex-shrink-0">
           <button
             onClick={() => {
               if (!outputPanelOpen && nodes.length > 0) {
@@ -335,30 +321,28 @@ export default function Sidebar() {
               }
               setOutputPanelOpen(!outputPanelOpen);
             }}
-            className={`w-full flex items-center justify-between pl-6 pr-2 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-500 shadow-xl ${
+            className={`w-full flex items-center justify-between pl-4 pr-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               outputPanelOpen
                 ? 'bg-zinc-800 text-white'
                 : warningCount > 0
-                  ? 'bg-amber-600/10 text-amber-500 border border-amber-500/20'
-                  : 'bg-blue-600 text-white shadow-blue-500/20'
+                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/25'
+                  : 'bg-blue-600 text-white hover:bg-blue-500'
             }`}
           >
-            <span className="font-mono">{outputPanelOpen ? 'CLOSE_OUTPUT' : 'INITIALIZE_COMPILE'}</span>
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-500 ${
+            <span className="flex items-center gap-2">
+              {outputPanelOpen ? 'Close output' : 'Compile'}
+              {!outputPanelOpen && warningCount > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              )}
+            </span>
+            <div className={`w-7 h-7 rounded-md flex items-center justify-center ${
               outputPanelOpen ? 'bg-zinc-700 text-white' : 'bg-white/10 text-white'
             }`}>
-              {outputPanelOpen ? <X size={16} weight="bold" /> : <Play size={16} weight="fill" />}
+              {outputPanelOpen ? <X size={14} weight="bold" /> : <Play size={14} weight="fill" />}
             </div>
-            {!outputPanelOpen && warningCount > 0 && (
-              <motion.div 
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute right-12 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" 
-              />
-            )}
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-/** Vanguard-tier badge atom for category and status labels. */
+/** Small category/status pill. */
 
 interface BadgeProps {
   label: string;

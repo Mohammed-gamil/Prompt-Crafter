@@ -8,16 +8,15 @@ interface TemplateCardProps {
 export default function TemplateCard({ template, onUse }: TemplateCardProps) {
   return (
     <div
-      className="group bg-[#1a1a2e] border border-gray-800 rounded-lg p-4 flex flex-col gap-3 hover:border-indigo-600/60 transition-colors cursor-pointer"
+      className="group bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex flex-col gap-3 hover:border-zinc-600 transition-colors cursor-pointer"
       onClick={() => onUse(template.id)}
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl leading-none">{template.icon}</span>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">
+          <h3 className="text-sm font-medium text-white">
             {template.name}
           </h3>
-          <p className="text-[11px] text-gray-400 mt-1 leading-snug">{template.description}</p>
+          <p className="text-[11px] text-zinc-500 mt-1 leading-snug">{template.description}</p>
         </div>
       </div>
 
@@ -26,18 +25,18 @@ export default function TemplateCard({ template, onUse }: TemplateCardProps) {
           {template.nodes.slice(0, 5).map((n, i) => (
             <span
               key={i}
-              className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 font-mono"
+              className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-mono"
             >
               {n.data.nodeType}
             </span>
           ))}
           {template.nodes.length > 5 && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-600">
               +{template.nodes.length - 5}
             </span>
           )}
         </div>
-        <span className="text-[10px] text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
+        <span className="text-[11px] text-zinc-500 group-hover:text-zinc-200 transition-colors flex-shrink-0 ml-2">
           Use →
         </span>
       </div>

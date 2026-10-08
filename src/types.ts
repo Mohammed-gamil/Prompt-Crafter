@@ -1,7 +1,7 @@
 import type { Node, Edge } from '@xyflow/react';
 
 // ── Node Categories ──
-export type NodeCategory = 'core' | 'domain-library' | 'smart' | 'custom';
+export type NodeCategory = 'core' | 'domain-library' | 'smart' | 'custom' | 'code' | 'feature';
 
 export type CoreNodeType =
   | 'domain'
@@ -43,7 +43,7 @@ export type DomainLibraryNodeType =
 
 export type SmartNodeType = 'SMART-01' | 'SMART-02' | 'SMART-03' | 'SMART-04' | 'SMART-05';
 
-export type ResourceType = 'RULES' | 'SPECS' | 'ARCH' | 'TASKS' | 'CONTEXT' | 'FORMAT' | 'ANY';
+export type ResourceType = 'RULES' | 'SPECS' | 'ARCH' | 'TASKS' | 'CONTEXT' | 'FORMAT' | 'ANY' | 'CODE' | 'FEATURE';
 
 export interface NodeField {
   id: string;
@@ -198,6 +198,79 @@ export interface PromptVersion {
   nodes: PromptNode[];
   edges: PromptEdge[];
   xml: string;
+  /** Content hash of nodes+edges — stable across reloads (Phase 5). */
+  hash?: string;
+  parentId?: string | null;
+  commitSha?: string | null;
+  graphHash?: string | null;
+}
+
+// ── Codebase-reference graph (code-as-nodes) ──
+export type CodeNodeKind =
+  | 'FOLDER'
+  | 'FILE'
+  | 'FUNC'
+  | 'FEATURE'
+  | 'FEATURE_PROPOSED'
+  | 'FILE_PROPOSED'
+  | 'FUNC_PROPOSED';
+
+export type CodeLinkKind =
+  | 'contains'
+  | 'imports'
+  | 'calls'
+  | 'renders'
+  | 'belongs-to'
+  | 'proposed-touches';
+
+export interface CodeEntity {
+  id: string;
+  kind: CodeNodeKind;
+  /** Repo-relative path, e.g. src/store.ts. FOLDER nodes use dir path. */
+  path: string;
+  /** Symbol name for FUNC nodes (function/class/component). */
+  symbol?: string;
+  symbolKind?: 'function' | 'class' | 'component' | 'route' | 'hook' | 'type' | 'other';
+  range?: { start: number; end: number };
+  /** FNV hash of file/symbol content — drives summary cache + incremental diff. */
+  hash: string;
+  /** One-line LLM summary ("what it does precisely"). Empty until Phase 2. */
+  summary?: string;
+  language?: string;
+  size?: number;
+  proposed?: boolean;
+  confidence?: number;
+  /** For FEATURE nodes: user-written description. */
+  description?: string;
+}
+
+export interface CodeLink {
+  id: string;
+  source: string;
+  target: string;
+  kind: CodeLinkKind;
+  proposed?: boolean;
+}
+
+export interface FeatureCluster {
+  id: string;
+  name: string;
+  description: string;
+  /** CodeEntity ids grouped under this feature. */
+  members: string[];
+  confidence: number;
+  auto?: boolean;
+}
+
+export interface CodeRepoMeta {
+  name: string;
+  branch?: string;
+  commitSha?: string | null;
+  importedAt: number;
+  source: 'upload' | 'github' | 'demo';
+  fileCount: number;
+  entityCount: number;
+  graphHash: string;
 }
 
 // ── Node palette items ──

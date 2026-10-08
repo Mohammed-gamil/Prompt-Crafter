@@ -19,6 +19,7 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { useAppStore, type WorkflowClipboard } from '../../store';
+import { useCodeStore } from '../../codeIndex/store';
 import PromptNodeComponent from '../organisms/PromptNode';
 import Sidebar from '../organisms/Sidebar';
 import OutputPanel from '../organisms/OutputPanel';
@@ -27,6 +28,10 @@ import ToastContainer from '../organisms/ToastContainer';
 import TemplatesModal from '../organisms/TemplatesModal';
 import VersionHistoryPanel from '../organisms/VersionHistoryPanel';
 import TestPanel from '../organisms/TestPanel';
+import IngestScreen from '../organisms/IngestScreen';
+import BuildingScreen from '../organisms/BuildingScreen';
+import ExploreScreen from '../organisms/ExploreScreen';
+import CodebaseEntryButton from '../molecules/CodebaseEntryButton';
 import { decodeWorkflowFromHash, clearShareHash } from '../../shareUrl';
 import { toast } from '../../toast';
 import { DRAG_TYPE } from '../molecules/PaletteNodeItem';
@@ -34,8 +39,6 @@ import { DRAG_TYPE } from '../molecules/PaletteNodeItem';
 const nodeTypes: NodeTypes = {
   promptNode: PromptNodeComponent,
 };
-
-const SPRING_TRANSITION: any = { type: 'spring', stiffness: 300, damping: 30 };
 
 function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
   const nodes = useAppStore((s) => s.nodes);
@@ -203,6 +206,9 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
     <div className="h-full w-full relative flex flex-col overflow-hidden">
       <div className="flex-1 relative">
         <Toolbar onOpenTemplates={onOpenTemplates} />
+        <div className="absolute top-4 left-4 z-20">
+          <CodebaseEntryButton />
+        </div>
         <ReactFlow
           nodes={nodes}
           edges={renderedEdges}
@@ -219,14 +225,14 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
         >
           <Background color="#27272a" gap={24} size={1} />
           <Controls
-            className="!bg-zinc-900 !border-zinc-800 !rounded-xl !shadow-2xl [&>button]:!bg-zinc-900 [&>button]:!border-zinc-800 [&>button]:!text-zinc-500 [&>button:hover]:!bg-zinc-800 [&>button:hover]:!text-zinc-300"
+            className="!bg-zinc-900 !border-zinc-800 !rounded-lg [&>button]:!bg-zinc-900 [&>button]:!border-zinc-800 [&>button]:!text-zinc-500 [&>button:hover]:!bg-zinc-800 [&>button:hover]:!text-zinc-300"
           />
           <MiniMap
             nodeColor={(node) => {
               const data = node.data as { color?: string };
               return data.color ?? '#3b82f6';
             }}
-            className="!bg-zinc-900 !border-zinc-800 !rounded-xl !shadow-2xl"
+            className="!bg-zinc-900 !border-zinc-800 !rounded-lg"
             maskColor="rgba(0, 0, 0, 0.7)"
           />
         </ReactFlow>
@@ -241,37 +247,26 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
               <div className="text-center max-w-sm px-6">
-                <div className="relative inline-block mb-10">
-                   <div className="text-6xl text-blue-500/20 font-bold">
-                      <Cube size={64} weight="duotone" />
-                   </div>
-                   <motion.div 
-                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 4 }}
-                      className="absolute inset-0 text-blue-400 blur-xl flex items-center justify-center"
-                   >
-                      <Cube size={64} weight="fill" />
-                   </motion.div>
+                <div className="mb-8 text-zinc-700">
+                   <Cube size={48} weight="duotone" />
                 </div>
-                <h3 className="text-white/80 text-lg font-bold uppercase tracking-[0.2em] mb-8">System Initialized</h3>
-                <div className="space-y-4 text-left">
+                <h3 className="text-zinc-300 text-base font-semibold mb-6">Start building</h3>
+                <div className="space-y-2 text-left">
                   {[
-                    { n: '01', text: 'Deploy units from tactical sidebar', icon: CursorClick },
-                    { n: '02', text: 'Configure mission parameters', icon: Selection },
-                    { n: '03', text: 'Initialize compilation protocol', icon: TerminalWindow },
+                    { n: '01', text: 'Add nodes from the sidebar', icon: CursorClick },
+                    { n: '02', text: 'Configure node content', icon: Selection },
+                    { n: '03', text: 'Compile to preview output', icon: TerminalWindow },
                   ].map((step) => (
-                    <motion.div 
-                      key={step.n} 
-                      className="flex items-start gap-4 p-3 rounded-xl bg-zinc-900/40 border border-zinc-800/50 backdrop-blur-sm shadow-inner"
+                    <div
+                      key={step.n}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900 border border-zinc-800"
                     >
-                      <span className="flex-shrink-0 w-6 h-6 rounded-lg border border-zinc-700 bg-zinc-800 text-blue-400 text-[10px] font-mono font-bold flex items-center justify-center tracking-tighter">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-400 text-[10px] font-mono flex items-center justify-center">
                         {step.n}
                       </span>
-                      <div className="flex-1">
-                         <p className="text-zinc-400 text-[11px] leading-relaxed font-bold uppercase tracking-wide">{step.text}</p>
-                      </div>
-                      <step.icon size={16} className="text-zinc-700" />
-                    </motion.div>
+                      <p className="flex-1 text-zinc-400 text-xs">{step.text}</p>
+                      <step.icon size={15} className="text-zinc-600" />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -287,8 +282,9 @@ export default function AppLayout() {
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [testPanelOpen, setTestPanelOpen] = useState(false);
   const loadWorkflow = useAppStore((s) => s.loadWorkflow);
+  const codeScreen = useCodeStore((s) => s.screen);
 
-  // Load shared workflow from URL hash on first mount
+  // Load shared workflow from URL hash on first mount (must stay before early returns)
   useEffect(() => {
     const shared = decodeWorkflowFromHash();
     if (shared) {
@@ -298,6 +294,39 @@ export default function AppLayout() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (codeScreen === 'ingest') {
+    return (
+      <ReactFlowProvider>
+        <div className="relative h-screen w-screen bg-zinc-950 overflow-hidden font-sans">
+          <IngestScreen />
+          <ToastContainer />
+        </div>
+      </ReactFlowProvider>
+    );
+  }
+
+  if (codeScreen === 'building') {
+    return (
+      <ReactFlowProvider>
+        <div className="relative h-screen w-screen bg-zinc-950 overflow-hidden font-sans">
+          <BuildingScreen />
+          <ToastContainer />
+        </div>
+      </ReactFlowProvider>
+    );
+  }
+
+  if (codeScreen === 'explore') {
+    return (
+      <ReactFlowProvider>
+        <div className="relative h-screen w-screen bg-zinc-950 overflow-hidden font-sans">
+          <ExploreScreen />
+          <ToastContainer />
+        </div>
+      </ReactFlowProvider>
+    );
+  }
 
   return (
     <ReactFlowProvider>
@@ -327,29 +356,21 @@ export default function AppLayout() {
         {/* Modals */}
         {templatesOpen && <TemplatesModal onClose={() => setTemplatesOpen(false)} />}
 
-        {/* Floating Action Button */}
-        <AnimatePresence>
-          {!testPanelOpen && (
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={SPRING_TRANSITION}
-              className="fixed bottom-10 right-10 z-30"
+        {/* Test panel toggle */}
+        {!testPanelOpen && (
+          <div className="fixed bottom-6 right-6 z-30">
+            <button
+              onClick={() => setTestPanelOpen(true)}
+              className="flex items-center gap-2 pl-4 pr-1.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-colors pointer-events-auto"
+              title="Open test panel"
             >
-              <button
-                onClick={() => setTestPanelOpen(true)}
-                className="group flex items-center gap-4 pl-6 pr-2 py-2 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl hover:bg-zinc-800 hover:border-zinc-700 transition-all active:scale-95 pointer-events-auto"
-                title="Initialize LLM Neural Link"
-              >
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">Test Protocol</span>
-                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)] group-hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all">
-                  <Lightning size={16} weight="fill" className="text-white animate-pulse" />
-                </div>
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <span className="text-xs text-zinc-300">Test</span>
+              <div className="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+                <Lightning size={14} weight="fill" className="text-white" />
+              </div>
+            </button>
+          </div>
+        )}
       </div>
     </ReactFlowProvider>
   );

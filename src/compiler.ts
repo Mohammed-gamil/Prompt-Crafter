@@ -323,6 +323,22 @@ function nodeToBlock(node: PromptNode): string | null {
         ? `  <output_schema>\n    ${esc(applyToneConversion(c))}\n  </output_schema>`
         : null;
 
+    case 'FEATURE':
+    case 'CODE_FEATURE':
+      return c
+        ? `  <feature_intent label="${lbl}">\n    ${esc(applyToneConversion(c))}\n  </feature_intent>`
+        : null;
+
+    case 'CODE_FILE':
+      return c
+        ? `  <code_file path="${lbl}">\n    ${esc(c)}\n  </code_file>`
+        : null;
+
+    case 'CODE_ENTITY':
+      return c
+        ? `  <code_entity label="${lbl}" type="${nt}">\n    ${esc(c)}\n  </code_entity>`
+        : null;
+
     default: {
       if (cat === 'domain-library') {
         return c

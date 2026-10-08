@@ -41,7 +41,7 @@ interface Props {
   onClose: () => void;
 }
 
-const SPRING_TRANSITION: any = { type: "spring" as const, stiffness: 300, damping: 30 };
+const SPRING_TRANSITION = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 export default function TestPanel({ open, onClose }: Props) {
   const nodes = useAppStore((s) => s.nodes);
@@ -138,19 +138,19 @@ export default function TestPanel({ open, onClose }: Props) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 20, opacity: 0 }}
           transition={SPRING_TRANSITION}
-          className="m-4 h-[480px] relative z-30 pointer-events-auto bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+          className="m-4 h-[480px] relative z-30 pointer-events-auto bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-gradient-to-b from-zinc-900/50 to-transparent flex-shrink-0">
-            <div className="flex items-center gap-4">
-               <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
-                  <Robot size={20} weight="duotone" />
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 flex-shrink-0">
+            <div className="flex items-center gap-3">
+               <div className="w-7 h-7 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
+                 <Robot size={16} weight="duotone" />
                </div>
                <div className="flex flex-col">
-                 <span className="text-sm font-bold text-white tracking-tight">Protocol Tester</span>
-                 <div className="flex items-center gap-2 mt-0.5">
-                   <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Active Model:</span>
-                   <span className="text-[10px] text-blue-400 font-mono font-bold">{settings.model}</span>
+                 <span className="text-sm font-semibold text-white">Test</span>
+                 <div className="flex items-center gap-1.5 mt-0.5">
+                   <span className="text-[10px] text-zinc-600">Model:</span>
+                   <span className="text-[11px] text-zinc-400 font-mono">{settings.model}</span>
                  </div>
                </div>
             </div>
@@ -198,11 +198,11 @@ export default function TestPanel({ open, onClose }: Props) {
                     <div className="w-16 h-16 rounded-full border-2 border-dashed border-zinc-800 flex items-center justify-center mb-6">
                        <ChatCircleDots size={32} />
                     </div>
-                    <p className="text-xs font-bold text-white uppercase tracking-widest">Awaiting Neural Link</p>
+                    <p className="text-xs font-medium text-zinc-400">No messages yet</p>
                     {nodes.length === 0 && (
-                      <div className="mt-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/5 border border-amber-500/10">
-                        <WarningCircle size={14} className="text-amber-500" />
-                        <span className="text-[10px] text-amber-500 font-bold uppercase tracking-tighter">System Prompt Null</span>
+                      <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-800">
+                        <WarningCircle size={13} className="text-amber-500" />
+                        <span className="text-[11px] text-zinc-500">Empty canvas — nothing to send</span>
                       </div>
                     )}
                   </div>
@@ -218,14 +218,14 @@ export default function TestPanel({ open, onClose }: Props) {
                 ))}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs shadow-inner">
+                    <div className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs">
                       <div className="flex items-center gap-3">
                          <motion.div 
                             animate={{ rotate: 360 }}
                             transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
                             className="w-3 h-3 rounded-full border-2 border-blue-500/30 border-t-blue-500"
                          />
-                         <span className="font-mono tracking-widest uppercase text-[10px]">Processing_Link...</span>
+                         <span className="font-mono text-[11px] text-zinc-500">Thinking...</span>
                       </div>
                     </div>
                   </div>
@@ -248,8 +248,8 @@ export default function TestPanel({ open, onClose }: Props) {
                         }
                       }}
                       rows={1}
-                      placeholder="Inject test instruction..."
-                      className="w-full text-sm bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-zinc-200 placeholder-zinc-700 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/10 resize-none transition-all shadow-inner min-h-[48px] max-h-[120px]"
+                      placeholder="Type a test message..."
+                      className="w-full text-sm bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-600 resize-none transition-colors min-h-[44px] max-h-[120px]"
                     />
                     {!input && (
                        <div className="absolute right-3 bottom-3 opacity-20 pointer-events-none">
@@ -260,7 +260,7 @@ export default function TestPanel({ open, onClose }: Props) {
                   <button
                     onClick={() => void sendMessage()}
                     disabled={!input.trim() || loading}
-                    className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:grayscale transition-all shadow-lg active:scale-95 flex-shrink-0"
+                    className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:grayscale transition-colors flex-shrink-0"
                   >
                     <PaperPlaneTilt size={20} weight="fill" />
                   </button>

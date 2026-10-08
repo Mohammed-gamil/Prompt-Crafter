@@ -33,12 +33,12 @@ export default function TemplatesModal({ onClose }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-[#13131d] border border-gray-700 rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-lg w-full max-w-2xl mx-4 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
           <div>
-            <h2 className="text-base font-bold text-white">Starter Templates</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Select a template to pre-fill the canvas with a production-ready workflow</p>
+            <h2 className="text-sm font-semibold text-white">Templates</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Start from a pre-built workflow</p>
           </div>
           <button
             onClick={onClose}
@@ -48,20 +48,20 @@ export default function TemplatesModal({ onClose }: Props) {
           </button>
         </div>
 
-        <div className="overflow-auto p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="overflow-auto p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {STARTER_TEMPLATES.map((tpl) => (
             <TemplateCard key={tpl.id} template={tpl} onUse={handleUse} />
           ))}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-800 flex items-center justify-between">
-          <p className="text-[11px] text-gray-600">
-            Templates replace the current canvas — export your work first if needed
+        <div className="px-5 py-3 border-t border-zinc-800 flex items-center justify-between">
+          <p className="text-[11px] text-zinc-600">
+            Templates replace the current canvas
           </p>
           <button
             onClick={onClose}
-            className="text-xs px-3 py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors"
+            className="text-xs px-3 py-1.5 rounded-md border border-zinc-700 text-zinc-300 hover:border-zinc-500 transition-colors"
           >
             Cancel
           </button>

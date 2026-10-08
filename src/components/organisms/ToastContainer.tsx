@@ -17,7 +17,7 @@ export default function ToastContainer() {
         return (
           <div
             key={t.id}
-            className={`toast-enter flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-medium shadow-2xl backdrop-blur-md whitespace-nowrap ${cfg.cls}`}
+            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg border border-zinc-800 bg-zinc-900 text-sm whitespace-nowrap ${cfg.cls}`}
           >
             <span className="text-base leading-none">{cfg.icon}</span>
             <span>{t.message}</span>

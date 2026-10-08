@@ -156,7 +156,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Features and user stories.',
     color: '#3b82f6',
     defaultContent: 'Specifications defined.',
-    // @ts-expect-error
+    // @ts-expect-error: portType/fields ride on PromptNodeData at runtime, not on PaletteItem
     portType: { in: ['RULES'], out: ['SPECS'] },
     fields: [
       { id: 'stories', label: 'User Stories', value: '', type: 'textarea' },
@@ -170,7 +170,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Implementation plan and architecture.',
     color: '#10b981',
     defaultContent: 'Implementation plan generated.',
-    // @ts-expect-error
+    // @ts-expect-error: portType/fields ride on PromptNodeData at runtime, not on PaletteItem
     portType: { in: ['SPECS', 'RULES'], out: ['ARCH'] },
     fields: [
       { id: 'arch', label: 'Architecture', value: '', type: 'textarea' },
@@ -184,7 +184,7 @@ export const PALETTE_ITEMS: PaletteItem[] = [
     description: 'Granular execution tasks.',
     color: '#8b5cf6',
     defaultContent: 'Tasks list finalized.',
-    // @ts-expect-error
+    // @ts-expect-error: portType/fields ride on PromptNodeData at runtime, not on PaletteItem
     portType: { in: ['ARCH', 'RULES'], out: ['TASKS'] },
     fields: [{ id: 'tasks', label: 'Task List', value: '', type: 'textarea' }],
   },

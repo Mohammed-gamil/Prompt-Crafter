@@ -36,38 +36,38 @@ export default function CustomNodeForm({ onSave, onCancel }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-2 mx-1 rounded-lg border border-gray-700 bg-[#1a1a2e] p-3 space-y-3"
+      className="mt-2 rounded-md border border-zinc-800 bg-zinc-900 p-3 space-y-3"
     >
-      <p className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">New Custom Node</p>
+      <p className="text-xs text-zinc-300">New custom node</p>
 
       {/* Label */}
       <div>
-        <label className="text-[10px] text-gray-500 mb-1 block">Label *</label>
+        <label className="text-[10px] text-zinc-500 mb-1 block">Label *</label>
         <input
           type="text"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="e.g. Audience Profile"
           required
-          className="w-full bg-[#12121a] border border-gray-700 text-xs text-gray-200 placeholder-gray-600 rounded px-2 py-1.5 outline-none focus:border-indigo-500 transition-colors"
+          className="w-full bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 placeholder-zinc-600 rounded-md px-2 py-1.5 outline-none focus:border-zinc-600 transition-colors"
         />
       </div>
 
       {/* Description */}
       <div>
-        <label className="text-[10px] text-gray-500 mb-1 block">Description</label>
+        <label className="text-[10px] text-zinc-500 mb-1 block">Description</label>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="One-line tooltip description"
-          className="w-full bg-[#12121a] border border-gray-700 text-xs text-gray-200 placeholder-gray-600 rounded px-2 py-1.5 outline-none focus:border-indigo-500 transition-colors"
+          className="w-full bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 placeholder-zinc-600 rounded-md px-2 py-1.5 outline-none focus:border-zinc-600 transition-colors"
         />
       </div>
 
       {/* Color swatches */}
       <div>
-        <label className="text-[10px] text-gray-500 mb-1.5 block">Color</label>
+        <label className="text-[10px] text-zinc-500 mb-1.5 block">Color</label>
         <div className="flex flex-wrap gap-1.5">
           {COLOR_SWATCHES.map((c) => (
             <ColorSwatch
@@ -90,13 +90,13 @@ export default function CustomNodeForm({ onSave, onCancel }: Props) {
 
       {/* Default content */}
       <div>
-        <label className="text-[10px] text-gray-500 mb-1 block">Default Content</label>
+        <label className="text-[10px] text-zinc-500 mb-1 block">Default content</label>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={3}
           placeholder="Pre-filled content when node is added to canvas…"
-          className="w-full bg-[#12121a] border border-gray-700 text-xs text-gray-200 placeholder-gray-600 rounded px-2 py-1.5 outline-none focus:border-indigo-500 transition-colors resize-y"
+          className="w-full bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 placeholder-zinc-600 rounded-md px-2 py-1.5 outline-none focus:border-zinc-600 transition-colors resize-y"
         />
       </div>
 
@@ -105,14 +105,14 @@ export default function CustomNodeForm({ onSave, onCancel }: Props) {
         <button
           type="submit"
           disabled={!label.trim()}
-          className="flex-1 py-1.5 rounded text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+          className="flex-1 py-1.5 rounded-md text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
         >
-          Create Node
+          Create
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1.5 rounded text-xs text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 transition-colors"
+          className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 transition-colors"
         >
           Cancel
         </button>

@@ -10,6 +10,7 @@ import {
 import type { PromptNode, PromptEdge, PromptNodeData, PromptNodeType, PaletteItem, PromptVersion, PromptNodeState, ResourceType } from './types';
 import { PALETTE_ITEMS } from './presets';
 import { toast } from './toast';
+import { newNodeId, newEdgeId, hashContent } from './lib/ids';
 
 export interface WorkflowClipboard {
   nodes: PromptNode[];
@@ -67,6 +68,8 @@ interface AppState {
 
 /**
  * Validates if two nodes can be connected based on their port types.
+ * CODE/FEATURE ports follow the same overlap rule; FEATURE out=[FEATURE]
+ * may only target CODE in=[CODE,ANY] or FEATURE in=[FEATURE,ANY].
  */
 function isValidConnection(source: PromptNode, target: PromptNode): boolean {
   const sourceOut = (source.data.portType?.out ?? ['ANY']) as ResourceType[];
@@ -75,6 +78,14 @@ function isValidConnection(source: PromptNode, target: PromptNode): boolean {
   // If source outputs RULES, it can only plug into something that accepts RULES or ANY
   if (sourceOut.includes('RULES')) {
     return targetIn.includes('RULES') || targetIn.includes('ANY');
+  }
+
+  // CODE ports: require CODE/ANY overlap (prevents prompt nodes wiring into code by accident)
+  if (sourceOut.includes('CODE') || sourceOut.includes('FEATURE')) {
+    return (
+      targetIn.includes('ANY') ||
+      sourceOut.some((t) => targetIn.includes(t))
+    );
   }
 
   // Otherwise, return true if there's any overlap or if either is ANY
@@ -132,9 +143,9 @@ function saveCustomItems(items: PaletteItem[]): void {
   } catch { /* storage full or unavailable */ }
 }
 
-let nodeIdCounter = 0;
-const nextId = () => `node_${++nodeIdCounter}`;
 let internalClipboard: WorkflowClipboard | null = null;
+const nextId = () => newNodeId('node');
+const nextEdgeId = () => newEdgeId('e');
 
 export const useAppStore = create<AppState>((set, get) => ({
   nodes: [],
@@ -228,7 +239,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
     const remappedEdges: PromptEdge[] = edges.map((e) => ({
       ...e,
-      id: nextId(),
+      id: nextEdgeId(),
       source: idMap.get(e.source) ?? e.source,
       target: idMap.get(e.target) ?? e.target,
     }));
@@ -377,7 +388,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       .filter((e) => selected.has(e.source) && selected.has(e.target))
       .map((e) => ({
         ...e,
-        id: nextId(),
+        id: nextEdgeId(),
         source: idMap.get(e.source) ?? e.source,
         target: idMap.get(e.target) ?? e.target,
       }));
@@ -430,7 +441,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const pastedEdges: PromptEdge[] = source.edges.map((e) => ({
       ...e,
-      id: nextId(),
+      id: nextEdgeId(),
       source: idMap.get(e.source) ?? e.source,
       target: idMap.get(e.target) ?? e.target,
     }));
@@ -450,13 +461,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   saveVersion: (name, xml = '') => {
     const { nodes, edges, versions } = get();
     const autoName = name ?? `Auto-save ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const hash = hashContent(JSON.stringify([nodes.map((n) => [n.id, n.data]), edges.map((e) => [e.source, e.target])]));
     const version: PromptVersion = {
-      id: `v_${Date.now()}`,
+      id: `v_${Date.now().toString(36)}_${hash}`,
       name: autoName,
       timestamp: Date.now(),
       nodes,
       edges,
       xml,
+      hash,
+      parentId: versions[0]?.id ?? null,
     };
     const next = [version, ...versions].slice(0, MAX_VERSIONS);
     set({ versions: next });

@@ -6,10 +6,8 @@ import {
   SpeakerSlash, 
   Trash, 
   Selection, 
-  DotsThreeVertical,
   CheckCircle,
-  WarningCircle,
-  Info
+  WarningCircle
 } from '@phosphor-icons/react';
 import type { PromptNode, PromptNodeData, PromptNodeState, ResourceType } from '../../types';
 import { useAppStore } from '../../store';
@@ -84,6 +82,8 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
       TASKS: '#8b5cf6',
       CONTEXT: '#64748b',
       FORMAT: '#f43f5e',
+      CODE: '#22d3ee',
+      FEATURE: '#a855f7',
       ANY: '#a1a1aa',
     };
     return mapping[type] || mapping.ANY;
@@ -93,16 +93,15 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
   const sourceColor = getPortColor(portType?.out);
 
   return (
-    <motion.div
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: stateOpacity }}
-      className="p-px rounded-xl bg-zinc-800 border border-zinc-700 shadow-2xl backdrop-blur-md"
+    <div
+      className="rounded-lg bg-zinc-800 border border-zinc-700"
       style={{
         minWidth: 260,
+        opacity: stateOpacity,
       }}
     >
       <div
-        className="rounded-[calc(0.75rem-1px)] overflow-hidden bg-zinc-950 flex flex-col"
+        className="rounded-lg overflow-hidden bg-zinc-950 flex flex-col"
         style={{
           border: state === 'error' ? '1px solid #ef4444' : state === 'active' ? `1px solid ${color}33` : '1px solid transparent',
           borderStyle: state === 'bypassed' ? 'dashed' : 'solid',
@@ -122,18 +121,8 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
           style={{ backgroundColor: `${color}08` }}
         >
           <div className="flex items-center gap-3">
-            <div className="relative">
-               <div className="w-2.5 h-2.5 rounded-full shadow-lg" style={{ backgroundColor: color }} />
-               {state === 'active' && (
-                 <motion.div 
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute inset-0 rounded-full"
-                    style={{ backgroundColor: color }}
-                 />
-               )}
-            </div>
-            <span className="text-xs font-bold text-zinc-100 tracking-tight">{label}</span>
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+            <span className="text-xs font-semibold text-zinc-100">{label}</span>
             <Badge label={badgeLabel} color={color} className="font-mono text-[8px]" />
           </div>
           <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
@@ -162,10 +151,8 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
         </div>
 
         {/* Description */}
-        <div className="px-4 py-2 bg-zinc-900/30 flex items-start gap-2">
-          <Info size={12} className="text-zinc-600 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-[10px] text-zinc-500 leading-normal font-medium">{description}</p>
+        <div className="px-4 py-2 border-b border-zinc-800/60">
+          <p className="text-[10px] text-zinc-600 leading-normal">{description}</p>
             <AnimatePresence>
               {errorMessage && (
                 <motion.div 
@@ -179,7 +166,6 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
         </div>
 
         {/* Content area */}
@@ -191,10 +177,10 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
               {fields.map((field) => (
                 <div key={field.id} className="flex flex-col gap-2">
                   <div className="flex items-center justify-between ml-1">
-                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                    <label className="text-[10px] text-zinc-500">
                       {field.label}
                     </label>
-                    {field.value && <CheckCircle size={10} className="text-blue-500/50" />}
+                    {field.value && <CheckCircle size={10} className="text-zinc-500" />}
                   </div>
                   {field.type === 'textarea' ? (
                     <textarea
@@ -202,7 +188,7 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                       onChange={(e) => onFieldChange(field.id, e.target.value)}
                       rows={3}
                       placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}...`}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-[11px] text-zinc-200 resize-y focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/10 focus:outline-none placeholder-zinc-700 transition-all font-sans shadow-inner"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-[11px] text-zinc-200 resize-y focus:border-zinc-600 focus:outline-none placeholder-zinc-600 transition-colors font-sans"
                       style={{ borderLeft: field.value ? `2px solid ${color}66` : undefined }}
                     />
                   ) : (
@@ -211,7 +197,7 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                       value={field.value}
                       onChange={(e) => onFieldChange(field.id, e.target.value)}
                       placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}...`}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-[11px] text-zinc-200 focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/10 focus:outline-none placeholder-zinc-700 transition-all font-sans shadow-inner"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-[11px] text-zinc-200 focus:border-zinc-600 focus:outline-none placeholder-zinc-600 transition-colors font-sans"
                       style={{ borderLeft: field.value ? `2px solid ${color}66` : undefined }}
                     />
                   )}
@@ -226,7 +212,7 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
                   onChange={onContentChange}
                   rows={3}
                   placeholder={`Enter ${label.toLowerCase()} parameters...`}
-                  className="w-full flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-[11px] text-zinc-200 resize-y focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/10 focus:outline-none placeholder-zinc-700 transition-all font-sans shadow-inner min-h-[80px]"
+                  className="w-full flex-1 bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-[11px] text-zinc-200 resize-y focus:border-zinc-600 focus:outline-none placeholder-zinc-600 transition-colors font-sans min-h-[80px]"
                   style={{ borderLeft: content ? `2px solid ${color}66` : undefined }}
                 />
                 {!content && (
@@ -237,10 +223,7 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
               </div>
               {nodeType === 'role' && (
                 <div className="mt-2">
-                   <div className="flex items-center gap-2 mb-2 ml-1">
-                      <DotsThreeVertical size={10} className="text-zinc-600" />
-                      <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">Quick Role Templates</span>
-                   </div>
+                   <p className="text-[10px] text-zinc-600 mb-1.5 ml-1">Presets</p>
                    <RolePresets onSelect={(c) => updateContent(id, c)} />
                 </div>
               )}
@@ -249,11 +232,11 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
         </div>
       </div>
 
-      {/* Handles - Precision Port Architecture */}
+      {/* Handles */}
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 shadow-lg transition-all hover:!scale-110 hover:!bg-zinc-700 !z-50"
+        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 transition-all hover:!scale-110 hover:!bg-zinc-700 !z-50"
         style={{ borderColor: targetColor }}
       >
         <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
@@ -263,14 +246,14 @@ function PromptNodeComponent({ id, data, selected }: NodeProps<PromptNode>) {
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 shadow-lg transition-all hover:!scale-110 hover:!bg-zinc-700 !z-50"
+        className="!w-4 !h-4 !rounded-md !border-2 !border-zinc-950 !bg-zinc-800 transition-all hover:!scale-110 hover:!bg-zinc-700 !z-50"
         style={{ borderColor: sourceColor }}
       >
         <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
            <div className="w-1 h-1 rounded-full bg-white" />
         </div>
       </Handle>
-    </motion.div>
+    </div>
   );}
 
 export default memo(PromptNodeComponent);

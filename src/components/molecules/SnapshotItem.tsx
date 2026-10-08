@@ -18,22 +18,22 @@ interface SnapshotItemProps {
 export default function SnapshotItem({ version, onRestore, onDelete }: SnapshotItemProps) {
   return (
     <li
-      className="group px-4 py-3 hover:bg-[#1a1a2e] cursor-pointer transition-colors"
+      className="group px-4 py-3 hover:bg-zinc-900 cursor-pointer transition-colors"
       onClick={() => onRestore(version.id, version.name)}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-xs text-white font-medium truncate">{version.name}</p>
-          <p className="text-[10px] text-gray-500 mt-0.5">{formatTimestamp(version.timestamp)}</p>
-          <p className="text-[10px] text-gray-600 mt-0.5">
+          <p className="text-[10px] text-zinc-500 mt-0.5">{formatTimestamp(version.timestamp)}</p>
+          <p className="text-[10px] text-zinc-600 mt-0.5">
             {version.nodes.length} node{version.nodes.length !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          <span className="text-[10px] text-indigo-400 mt-1">Restore</span>
+          <span className="text-[11px] text-zinc-400 mt-0.5">Restore</span>
           <button
             onClick={(e) => onDelete(version.id, version.name, e)}
-            className="text-[10px] text-red-500 hover:text-red-400 mt-1 ml-1"
+            className="text-[11px] text-zinc-600 hover:text-red-400 mt-0.5 ml-1"
             title="Delete snapshot"
           >
             ✕

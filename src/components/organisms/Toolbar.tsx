@@ -67,7 +67,7 @@ interface NodePackFile {
   nodes: PaletteItem[];
 }
 
-const SPRING_TRANSITION: any = { type: 'spring', stiffness: 400, damping: 30 };
+const SPRING_TRANSITION = { type: 'spring', stiffness: 400, damping: 30 } as const;
 
 export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => void }) {
   const nodes = useAppStore((s) => s.nodes);
@@ -84,7 +84,7 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
   const handleExportWorkflow = () => {
     const payload: WorkflowFile = { version: 1, kind: 'workflow', nodes, edges };
     downloadJson(`prompt-workflow-${Date.now()}.json`, payload);
-    toast('Protocol export sequence complete', 'success');
+    toast('Workflow exported', 'success');
   };
 
   const handleImportWorkflow = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,11 +94,11 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
     try {
       const data = await readJsonFile<WorkflowFile>(file);
       if (data.kind !== 'workflow' || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
-        toast('Malformed protocol file detected', 'error');
+        toast('Invalid workflow file', 'error');
         return;
       }
       loadWorkflow(data.nodes, data.edges);
-      toast('Protocol initialization complete', 'success');
+      toast('Workflow loaded', 'success');
     } catch (err) {
       toast((err as Error).message, 'error');
     }
@@ -106,7 +106,7 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
 
   const handleExportPack = () => {
     if (customPaletteItems.length === 0) {
-      toast('No bespoke components to export', 'warning');
+      toast('No custom nodes to export', 'warning');
       return;
     }
     const payload: NodePackFile = { version: 1, kind: 'node-pack', nodes: customPaletteItems };
@@ -158,7 +158,7 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
       <input ref={packRef}     type="file" accept=".json" className="hidden" onChange={handleImportPack} />
 
       {/* Main group */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 shadow-2xl pointer-events-auto"> 
+      <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-900 border border-zinc-800 pointer-events-auto"> 
         <ToolbarButton
           icon={<Layout size={16} weight="duotone" />}
           label="Templates"
@@ -180,7 +180,7 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
       </div>
 
       {/* Workflow group */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800 shadow-xl pointer-events-auto backdrop-blur-md"> 
+      <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 pointer-events-auto"> 
         <ToolbarButton
           icon={<FileArrowDown size={16} weight="bold" />}
           label="Import"
@@ -195,7 +195,7 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
       </div>
 
       {/* Node pack group */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-900/60 border border-zinc-800 shadow-lg pointer-events-auto opacity-80 hover:opacity-100 transition-opacity">  
+      <div className="flex items-center gap-1.5 p-1 rounded-lg bg-zinc-900 border border-zinc-800 pointer-events-auto opacity-80 hover:opacity-100 transition-opacity">  
         <ToolbarButton
           icon={<Archive size={16} weight="bold" />}
           label="Library In"
