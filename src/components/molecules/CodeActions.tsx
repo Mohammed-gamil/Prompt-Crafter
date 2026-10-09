@@ -3,14 +3,21 @@ import { Brain, TreeStructure } from '@phosphor-icons/react';
 import { useCodeStore } from '../../codeIndex/store';
 import { summarizeEntities } from '../../codeIndex/summarize';
 import { clusterFeatures } from '../../codeIndex/cluster';
+import { loadLLMSettings } from '../../lib/openrouter';
 import { toast } from '../../toast';
+
+function hasKey(): boolean {
+  try { return !!loadLLMSettings().apiKey; } catch { return false; }
+}
+
+const OFFLINE_HINT = 'No API key set — using offline mode. Open Settings (gear) to add one for better results.';
 
 export default function CodeActions() {
   const entities = useCodeStore((s) => s.entities);
   const links = useCodeStore((s) => s.links);
   const snippets = useCodeStore((s) => s.snippets);
   const setSummaries = useCodeStore((s) => s.setSummaries);
-  const setFeatures = useCodeStore((s) => s.setFeatures);
+  const replaceAutoFeatures = useCodeStore((s) => s.replaceAutoFeatures);
   const setView = useCodeStore((s) => s.setView);
   const [busy, setBusy] = useState<'idle' | 'summarize' | 'cluster'>('idle');
   const [pct, setPct] = useState('');
@@ -19,6 +26,8 @@ export default function CodeActions() {
 
   const runSummarize = async () => {
     setBusy('summarize');
+    const offline = !hasKey();
+    if (offline) toast(OFFLINE_HINT, 'warning');
     try {
       const importCounts = new Map<string, number>();
       for (const l of links) {
@@ -38,7 +47,7 @@ export default function CodeActions() {
         onProgress: (d, t) => setPct(`${d}/${t}`),
       });
       setSummaries(map);
-      toast('Summaries ready — each node now says what it does', 'success');
+      toast(offline ? 'Offline summaries ready (generic) — add a key for precise ones' : 'Summaries ready — each node now says what it does', 'success');
     } catch (e) {
       toast((e as Error).message, 'error');
     } finally {
@@ -48,11 +57,13 @@ export default function CodeActions() {
 
   const runCluster = async () => {
     setBusy('cluster');
+    const offline = !hasKey();
+    if (offline) toast(OFFLINE_HINT, 'warning');
     try {
       const feats = await clusterFeatures(entities);
-      setFeatures(feats);
+      replaceAutoFeatures(feats);
       setView('feature');
-      toast(`${feats.length} features detected`, 'success');
+      toast(offline ? `${feats.length} capability groups (offline grouping)` : `${feats.length} features detected`, 'success');
     } catch (e) {
       toast((e as Error).message, 'error');
     } finally {

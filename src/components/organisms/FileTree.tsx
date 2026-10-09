@@ -4,12 +4,12 @@ import { useCodeStore } from '../../codeIndex/store';
 
 export default function FileTree() {
   const entities = useCodeStore((s) => s.entities);
+  const links = useCodeStore((s) => s.links);
   const selectedId = useCodeStore((s) => s.selectedId);
   const select = useCodeStore((s) => s.select);
   const focusFolder = useCodeStore((s) => s.focusFolder);
   const level = useCodeStore((s) => s.level);
   const setLevel = useCodeStore((s) => s.setLevel);
-  const features = useCodeStore((s) => s.features);
   const view = useCodeStore((s) => s.view);
 
   const tree = useMemo(() => {
@@ -25,18 +25,26 @@ export default function FileTree() {
   }, [entities]);
 
   if (view === 'feature') {
+    const feats = entities.filter((e) => e.kind === 'FEATURE' || e.kind === 'FEATURE_PROPOSED');
+    const memberCount = new Map<string, number>();
+    for (const l of links) {
+      if (l.kind === 'belongs-to' || l.kind === 'proposed-touches') {
+        memberCount.set(l.source, (memberCount.get(l.source) ?? 0) + 1);
+      }
+    }
     return (
       <div className="w-64 shrink-0 h-full overflow-auto bg-zinc-950 border-r border-zinc-800 p-4">
         <p className="text-[11px] text-zinc-600 mb-3">Features</p>
-        {features.length === 0 && <p className="text-[11px] text-zinc-600">No features yet — run clustering or add one.</p>}
-        {features.map((f) => (
+        {feats.length === 0 && <p className="text-[11px] text-zinc-600">No features yet — detect them or add one.</p>}
+        {feats.map((f) => (
           <button key={f.id} onClick={() => select(f.id)}
-            className={`w-full text-left p-3 mb-2 rounded-xl border transition-all ${selectedId === f.id ? 'border-blue-500/50 bg-blue-500/5' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-600'}`}>
+            className={`w-full text-left p-3 mb-2 rounded-lg border transition-colors ${selectedId === f.id ? 'border-zinc-500 bg-zinc-900' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-600'}`}>
             <div className="flex items-center gap-2 mb-1">
-              <Sparkle size={12} className="text-purple-400" />
-              <span className="text-xs font-bold text-white truncate">{f.name}</span>
+              <Sparkle size={12} className="text-zinc-500 shrink-0" />
+              <span className="text-xs text-white truncate">{f.symbol || f.path}</span>
+              {f.proposed && <span className="ml-auto text-[9px] text-zinc-500 font-mono">new</span>}
             </div>
-            <p className="text-[10px] text-zinc-500">{f.members.length} items</p>
+            <p className="text-[10px] text-zinc-600">{memberCount.get(f.id) ?? 0} items</p>
           </button>
         ))}
       </div>

@@ -51,7 +51,6 @@ const nodeTypes = { codeNode: CodeNode };
 export default function CodeGraphCanvas() {
   const entities = useCodeStore((s) => s.entities);
   const links = useCodeStore((s) => s.links);
-  const features = useCodeStore((s) => s.features);
   const view = useCodeStore((s) => s.view);
   const level = useCodeStore((s) => s.level);
   const selectedId = useCodeStore((s) => s.selectedId);
@@ -60,28 +59,35 @@ export default function CodeGraphCanvas() {
 
   const { nodes, edges, detail } = useMemo(() => {
     if (view === 'feature') {
-      const featEnts = entities.filter((e) => e.kind === 'FEATURE' || e.kind === 'FEATURE_PROPOSED');
-      const items = features.length > 0
-        ? features
-        : featEnts.map((e) => ({ id: e.id, name: e.symbol || e.path, description: e.description || '', members: [] as string[], confidence: 1, auto: false }));
+      const items = entities.filter((e) => e.kind === 'FEATURE' || e.kind === 'FEATURE_PROPOSED');
+      const memberCount = new Map<string, number>();
+      for (const l of links) {
+        if (l.kind === 'belongs-to' || l.kind === 'proposed-touches') {
+          memberCount.set(l.source, (memberCount.get(l.source) ?? 0) + 1);
+        }
+      }
       const pos = layoutGrid(Math.max(1, items.length));
       const nodes: Node[] = items.map((f, i) => ({
         id: f.id, type: 'codeNode', position: pos[i],
         selected: selectedId === f.id,
         data: {
-          label: f.name, sub: `${f.members.length} items`,
-          summary: f.description || 'Feature cluster — files + functions serving it.',
+          label: f.symbol || f.path, sub: `${memberCount.get(f.id) ?? 0} items`,
+          summary: f.description || f.summary || 'Feature — files + functions serving it.',
           color: KIND_COLOR.FEATURE, kind: 'FEATURE',
-          proposed: featEnts.find((e) => e.id === f.id)?.proposed,
+          proposed: f.proposed,
         },
       }));
       // feature -> member edges
       const byId = new Set(entities.map((e) => e.id));
       const edges: Edge[] = [];
-      for (const f of features) {
-        for (const m of f.members) {
-          if (!byId.has(m)) continue;
-          edges.push({ id: `e-${f.id}-${m}`, source: f.id, target: m, animated: false, style: { stroke: '#8b5cf6', strokeWidth: 1.5, opacity: 0.6 } });
+      for (const l of links) {
+        if ((l.kind === 'belongs-to' || l.kind === 'proposed-touches') && byId.has(l.source) && byId.has(l.target)) {
+          const src = entities.find((e) => e.id === l.source);
+          if (src?.kind !== 'FEATURE' && src?.kind !== 'FEATURE_PROPOSED') continue;
+          edges.push({
+            id: l.id, source: l.source, target: l.target, animated: false,
+            style: { stroke: '#71717a', strokeWidth: 1.5, opacity: l.proposed ? 0.7 : 0.6, strokeDasharray: l.proposed ? '5 4' : undefined },
+          });
         }
       }
       const detail = entities.find((e) => e.id === selectedId) ?? null;
@@ -143,7 +149,7 @@ export default function CodeGraphCanvas() {
     }
     const detail = entities.find((e) => e.id === selectedId) ?? null;
     return { nodes, edges, detail };
-  }, [entities, links, features, view, level, focusedFolder, selectedId]);
+  }, [entities, links, view, level, focusedFolder, selectedId]);
 
   return (
     <div className="flex-1 relative h-full">

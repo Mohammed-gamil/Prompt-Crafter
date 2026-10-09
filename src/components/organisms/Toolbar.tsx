@@ -1,16 +1,18 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FileArrowDown, 
-  FileArrowUp, 
-  ShareNetwork, 
-  Clock, 
-  Layout, 
-  Archive, 
-  Export 
+import {
+  FileArrowDown,
+  FileArrowUp,
+  ShareNetwork,
+  Clock,
+  Layout,
+  Archive,
+  Export,
+  FolderOpen
 } from '@phosphor-icons/react';
 import { toast } from '../../toast';
 import { useAppStore } from '../../store';
+import { useCodeStore } from '../../codeIndex/store';
 import type { PaletteItem } from '../../types';
 import type { PromptNode, PromptEdge } from '../../types';
 import { encodeWorkflowToHash } from '../../shareUrl';
@@ -77,6 +79,8 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
   const importNodePack = useAppStore((s) => s.importNodePack);
   const historyOpen = useAppStore((s) => s.historyOpen);
   const setHistoryOpen = useAppStore((s) => s.setHistoryOpen);
+  const codeRepo = useCodeStore((s) => s.repo);
+  const setCodeScreen = useCodeStore((s) => s.setScreen);
 
   const workflowRef = useRef<HTMLInputElement>(null);
   const packRef = useRef<HTMLInputElement>(null);
@@ -111,7 +115,7 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
     }
     const payload: NodePackFile = { version: 1, kind: 'node-pack', nodes: customPaletteItems };
     downloadJson(`prompt-node-pack-${Date.now()}.json`, payload);
-    toast(`Library export complete (${customPaletteItems.length} components)`, 'success');
+    toast('Library exported', 'success');
   };
 
   const handleImportPack = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,12 +125,12 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
     try {
       const data = await readJsonFile<NodePackFile>(file);
       if (data.kind !== 'node-pack' || !Array.isArray(data.nodes)) {
-        toast('Malformed library file detected', 'error');
+        toast('Invalid library file', 'error');
         return;
       }
       const added = data.nodes.length;
       importNodePack(data.nodes);
-      toast(`Library merge complete (${added} components)`, 'success');
+      toast(`Library updated (${added} nodes)`, 'success');
     } catch (err) {
       toast((err as Error).message, 'error');
     }
@@ -134,15 +138,15 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
 
   const handleShare = async () => {
     if (nodes.length === 0) {
-      toast('Null canvas cannot be shared', 'warning');
+      toast('Nothing to share yet', 'warning');
       return;
     }
     const url = encodeWorkflowToHash(nodes, edges);
     try {
       await navigator.clipboard.writeText(url);
-      toast('Encrypted share hash generated', 'success');
+      toast('Share link copied', 'success');
     } catch {
-      toast('Hash generation failed', 'error');
+      toast('Could not copy link', 'error');
     }
   };
 
@@ -156,6 +160,15 @@ export default function Toolbar({ onOpenTemplates }: { onOpenTemplates?: () => v
       {/* Hidden file inputs */}
       <input ref={workflowRef} type="file" accept=".json" className="hidden" onChange={handleImportWorkflow} />
       <input ref={packRef}     type="file" accept=".json" className="hidden" onChange={handleImportPack} />
+
+      {/* Codebase app */}
+      <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-900 border border-zinc-800 pointer-events-auto">
+        <ToolbarButton
+          icon={<FolderOpen size={16} weight="duotone" />}
+          label={codeRepo ? codeRepo.name : 'Codebase'}
+          onClick={() => setCodeScreen(codeRepo ? 'explore' : 'ingest')}
+        />
+      </div>
 
       {/* Main group */}
       <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-900 border border-zinc-800 pointer-events-auto"> 

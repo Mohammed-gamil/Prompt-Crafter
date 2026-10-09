@@ -39,7 +39,7 @@ interface ChatOpts {
 
 /** POST chat completion; returns raw assistant text. Throws with short message on failure. */
 export async function chatComplete(settings: OpenRouterSettings, user: string, opts: ChatOpts = {}): Promise<string> {
-  if (!settings.apiKey) throw new Error('Add an API key first (canvas → Test → gear icon).');
+  if (!settings.apiKey) throw new Error('Add an API key in Settings (gear icon, top right) first.');
   const endpoint = `${validateBaseUrl(settings.baseUrl)}/chat/completions`;
   const body: Record<string, unknown> = {
     model: settings.model,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Copy, Check, X } from '@phosphor-icons/react';
 import { useCodeStore } from '../../codeIndex/store';
 import { buildBuilderPrompt, buildCheckerPrompt } from '../../codeIndex/export';
@@ -10,6 +10,12 @@ export default function ExportModal({ featureId, onClose }: { featureId: string;
   const repo = useCodeStore((s) => s.repo);
   const [tab, setTab] = useState<'builder' | 'checker'>('builder');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   const text = useMemo(
     () => (tab === 'builder'

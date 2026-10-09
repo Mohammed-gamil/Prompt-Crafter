@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Plus, Check, X } from '@phosphor-icons/react';
 import { useCodeStore } from '../../codeIndex/store';
-import { newNodeId, hashContent } from '../../lib/ids';
 import { proposeFeature } from '../../codeIndex/propose';
 import { toast } from '../../toast';
 
@@ -14,7 +13,9 @@ export default function AddFeatureBar() {
   const applyProposal = useCodeStore((s) => s.applyProposal);
   const acceptProposal = useCodeStore((s) => s.acceptProposal);
   const dismissProposed = useCodeStore((s) => s.dismissProposed);
+  const addManualFeature = useCodeStore((s) => s.addManualFeature);
   const setView = useCodeStore((s) => s.setView);
+  const select = useCodeStore((s) => s.select);
   const selectedId = useCodeStore((s) => s.selectedId);
   const entities = useCodeStore((s) => s.entities);
   const links = useCodeStore((s) => s.links);
@@ -23,18 +24,12 @@ export default function AddFeatureBar() {
 
   const addManual = () => {
     if (!name.trim()) return;
-    const id = newNodeId('code');
-    applyProposal(
-      [{
-        id, kind: 'FEATURE', path: `features/${name.trim().toLowerCase().replace(/\s+/g, '-')}`,
-        symbol: name.trim(), description: desc.trim() || 'User-defined feature.',
-        hash: hashContent(name + desc + Date.now()), summary: desc.trim(),
-      }],
-      selectedId && entities.some((e) => e.id === selectedId)
-        ? [{ id: newNodeId('link'), source: id, target: selectedId, kind: 'belongs-to' as const }]
-        : [],
+    const id = addManualFeature(
+      name.trim(),
+      desc.trim() || 'User-defined feature.',
+      selectedId && entities.some((e) => e.id === selectedId) ? [selectedId] : [],
     );
-    setName(''); setDesc(''); setOpen(false); setView('feature');
+    setName(''); setDesc(''); setOpen(false); setView('feature'); select(id);
   };
 
   const autoMap = async () => {

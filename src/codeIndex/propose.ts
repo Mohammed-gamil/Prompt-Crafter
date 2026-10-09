@@ -66,7 +66,7 @@ export async function proposeFeature(
   snippets: Record<string, string>,
 ): Promise<{ entities: CodeEntity[]; links: CodeLink[]; risks: string[] }> {
   const settings = loadLLMSettings();
-  if (!settings.apiKey) throw new Error('Add an API key first (canvas → Test → gear icon).');
+  if (!settings.apiKey) throw new Error('Add an API key in Settings (gear icon, top right) first.');
   const { text } = buildContextPack(entities, links, name, desc, snippets);
 
   const raw = await chatComplete(

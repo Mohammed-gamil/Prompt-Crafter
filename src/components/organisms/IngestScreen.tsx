@@ -14,12 +14,16 @@ export default function IngestScreen() {
   const [busy, setBusy] = useState(false);
   const dirRef = useRef<HTMLInputElement>(null);
 
-  const doIndex = async (name: string, source: 'upload' | 'github' | 'demo', getRaw: () => Promise<{ path: string; content: string }[]>, branch?: string) => {
+  const doIndex = async (
+    name: string,
+    source: 'upload' | 'github' | 'demo',
+    getRaw: () => Promise<{ files: { path: string; content: string }[]; name?: string; branch?: string }>,
+  ) => {
     setBusy(true);
     setError(null);
     setScreen('building');
     try {
-      const raw = await getRaw();
+      const { files: raw, name: resolvedName, branch } = await getRaw();
       setProgress({ done: 0, total: raw.length, label: `Indexing ${raw.length} files…` });
       // yield to paint building screen
       await new Promise((r) => setTimeout(r, 30));
@@ -29,7 +33,7 @@ export default function IngestScreen() {
       for (const f of raw) snippets[f.path] = f.content.slice(0, 2000);
       setSnippets(snippets);
       loadIndexed(
-        { name, branch, importedAt: Date.now(), source, fileCount, entityCount: entities.length, commitSha: null },
+        { name: resolvedName ?? name, branch, importedAt: Date.now(), source, fileCount, entityCount: entities.length, commitSha: null },
         entities,
         links,
       );
@@ -69,7 +73,7 @@ export default function IngestScreen() {
             onChange={(e) => {
               const files = e.target.files;
               if (!files || files.length === 0) return;
-              void doIndex(files[0].webkitRelativePath?.split('/')[0] || 'local-project', 'upload', () => filesFromDirectoryUpload(files));
+              void doIndex(files[0].webkitRelativePath?.split('/')[0] || 'local-project', 'upload', async () => ({ files: await filesFromDirectoryUpload(files) }));
               e.target.value = '';
             }}
           />
@@ -92,9 +96,7 @@ export default function IngestScreen() {
                       const { raw, repoName, branch } = await filesFromGithub(githubUrl, 150, (done, total) =>
                         setProgress({ done, total, label: `Fetching ${done}/${total} files…` }),
                       );
-                      (doIndex as { _branch?: string })._branch = branch;
-                      void repoName;
-                      return raw;
+                      return { files: raw, name: repoName, branch };
                     })
                   }
                   className="px-4 py-2 rounded-md bg-blue-600 text-white text-xs hover:bg-blue-500 disabled:opacity-40 transition-colors"
@@ -107,7 +109,7 @@ export default function IngestScreen() {
 
           <button
             disabled={busy}
-            onClick={() => doIndex('demo-project', 'demo', async () => demoFiles())}
+            onClick={() => doIndex('demo-project', 'demo', async () => ({ files: demoFiles() }))}
             className="w-full flex items-center gap-3 p-4 rounded-lg border border-dashed border-zinc-800 hover:border-zinc-600 transition-colors text-left disabled:opacity-50"
           >
             <Flask size={16} className="text-zinc-600" />

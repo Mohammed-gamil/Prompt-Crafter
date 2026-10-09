@@ -47,7 +47,7 @@ export default function OutputPanel() {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 20, opacity: 0 }}
           transition={SPRING_TRANSITION}
-          className="m-4 w-[520px] relative z-30 pointer-events-auto overflow-hidden bg-zinc-950 border border-zinc-800 rounded-lg flex flex-col h-[calc(100vh-2rem)]"
+          className="m-4 w-[520px] max-w-[calc(100vw-2rem)] relative z-30 pointer-events-auto overflow-hidden bg-zinc-950 border border-zinc-800 rounded-lg flex flex-col h-[calc(100vh-2rem)]"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 flex-shrink-0">

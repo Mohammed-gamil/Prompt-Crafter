@@ -242,6 +242,8 @@ export interface CodeEntity {
   confidence?: number;
   /** For FEATURE nodes: user-written description. */
   description?: string;
+  /** True for LLM-clustered features (replaced on re-cluster); manual ones persist. */
+  auto?: boolean;
 }
 
 export interface CodeLink {

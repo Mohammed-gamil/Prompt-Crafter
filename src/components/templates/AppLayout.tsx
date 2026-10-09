@@ -31,7 +31,6 @@ import TestPanel from '../organisms/TestPanel';
 import IngestScreen from '../organisms/IngestScreen';
 import BuildingScreen from '../organisms/BuildingScreen';
 import ExploreScreen from '../organisms/ExploreScreen';
-import CodebaseEntryButton from '../molecules/CodebaseEntryButton';
 import { decodeWorkflowFromHash, clearShareHash } from '../../shareUrl';
 import { toast } from '../../toast';
 import { DRAG_TYPE } from '../molecules/PaletteNodeItem';
@@ -206,9 +205,6 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
     <div className="h-full w-full relative flex flex-col overflow-hidden">
       <div className="flex-1 relative">
         <Toolbar onOpenTemplates={onOpenTemplates} />
-        <div className="absolute top-4 left-4 z-20">
-          <CodebaseEntryButton />
-        </div>
         <ReactFlow
           nodes={nodes}
           edges={renderedEdges}
@@ -281,6 +277,7 @@ function FlowCanvas({ onOpenTemplates }: { onOpenTemplates: () => void }) {
 export default function AppLayout() {
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [testPanelOpen, setTestPanelOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const loadWorkflow = useAppStore((s) => s.loadWorkflow);
   const codeScreen = useCodeStore((s) => s.screen);
 
@@ -333,9 +330,18 @@ export default function AppLayout() {
       <div className="relative h-screen w-screen bg-zinc-950 overflow-hidden font-sans">
         <VersionHistoryPanel />
 
-        {/* Tactical UI Layers */}
+        {/* Overlay UI */}
         <div className="absolute inset-0 z-20 pointer-events-none flex">
-          <Sidebar />
+          {sidebarOpen ? (
+            <Sidebar onCollapse={() => setSidebarOpen(false)} />
+          ) : (
+            <div className="m-4 pointer-events-auto">
+              <button onClick={() => setSidebarOpen(true)} title="Show sidebar"
+                className="w-9 h-9 flex items-center justify-center rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-zinc-200 hover:border-zinc-600 transition-colors">
+                <Cube size={16} weight="duotone" />
+              </button>
+            </div>
+          )}
 
           <div className="flex-1 relative flex flex-col pointer-events-none">
             <div className="flex-1 pointer-events-none" />

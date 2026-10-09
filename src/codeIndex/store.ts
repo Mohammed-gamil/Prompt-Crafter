@@ -12,7 +12,6 @@ interface CodeState {
   repo: CodeRepoMeta | null;
   entities: CodeEntity[];
   links: CodeLink[];
-  features: FeatureCluster[];
   view: ExploreView;
   level: ExploreLevel;
   selectedId: string | null;
@@ -32,7 +31,10 @@ interface CodeState {
   focusFolder: (path: string | null) => void;
   setSnippets: (s: Record<string, string>) => void;
   setSummaries: (map: Record<string, string>) => void;
-  setFeatures: (f: FeatureCluster[]) => void;
+  /** Materialize LLM clusters as FEATURE entities (replaces previous auto set). */
+  replaceAutoFeatures: (clusters: FeatureCluster[]) => void;
+  /** Append one manual FEATURE entity. Returns its id. */
+  addManualFeature: (name: string, description: string, memberIds: string[]) => string;
   applyProposal: (entities: CodeEntity[], links: CodeLink[]) => void;
   acceptProposal: () => void;
   dismissProposed: () => void;
@@ -45,11 +47,10 @@ function graphHash(entities: CodeEntity[], links: CodeLink[]): string {
 }
 
 export const useCodeStore = create<CodeState>((set, get) => ({
-  screen: 'prompt',
+  screen: 'ingest',
   repo: null,
   entities: [],
   links: [],
-  features: [],
   view: 'structure',
   level: 'folder',
   selectedId: null,
@@ -65,7 +66,7 @@ export const useCodeStore = create<CodeState>((set, get) => ({
   loadIndexed: (repo, entities, links) =>
     set({
       repo: { ...repo, graphHash: graphHash(entities, links) },
-      entities, links, features: [],
+      entities, links,
       screen: 'explore', view: 'structure', level: entities.some((e) => e.kind === 'FOLDER') ? 'folder' : 'file',
       selectedId: null, focusedFolder: null, error: null,
     }),
@@ -81,7 +82,65 @@ export const useCodeStore = create<CodeState>((set, get) => ({
       entities: s.entities.map((e) => (map[e.hash] ? { ...e, summary: map[e.hash] } : e)),
     })),
 
-  setFeatures: (features) => set({ features }),
+  replaceAutoFeatures: (clusters) =>
+    set((s) => {
+      const alive = s.entities.filter((e) => !(e.kind === 'FEATURE' && e.auto));
+      const aliveIds = new Set(alive.map((e) => e.id));
+      const byId = new Map(s.entities.map((e) => [e.id, e]));
+      const featEnts: CodeEntity[] = [];
+      const featLinks: CodeLink[] = [];
+      for (const c of clusters) {
+        const members = c.members.filter((m) => byId.has(m));
+        if (members.length === 0) continue;
+        featEnts.push({
+          id: c.id, kind: 'FEATURE', path: `features/${c.name.toLowerCase().replace(/\s+/g, '-').slice(0, 60)}`,
+          symbol: c.name.slice(0, 80), description: c.description.slice(0, 300),
+          hash: c.id, summary: c.description.slice(0, 200),
+          confidence: c.confidence, auto: true,
+        });
+        for (const m of members.slice(0, 80)) {
+          featLinks.push({ id: `link_${c.id}_${m}`.slice(0, 60), source: c.id, target: m, kind: 'belongs-to' });
+        }
+      }
+      const featIds = new Set(featEnts.map((e) => e.id));
+      const links = [
+        ...s.links.filter((l) => {
+          // drop old auto-feature edges; keep the rest if still alive
+          const autoEdge = (byId.get(l.source)?.kind === 'FEATURE' && byId.get(l.source)?.auto) ||
+            (byId.get(l.target)?.kind === 'FEATURE' && byId.get(l.target)?.auto);
+          if (autoEdge) return false;
+          return aliveIds.has(l.source) && aliveIds.has(l.target);
+        }),
+        ...featLinks,
+      ];
+      const entities = [...alive, ...featEnts];
+      void featIds;
+      return {
+        entities, links,
+        repo: s.repo ? { ...s.repo, graphHash: graphHash(entities, links) } : s.repo,
+      };
+    }),
+
+  addManualFeature: (name, description, memberIds) => {
+    const id = `feat_${Date.now().toString(36)}`;
+    const byId = new Set(get().entities.map((e) => e.id));
+    const members = memberIds.filter((m) => byId.has(m));
+    const ent: CodeEntity = {
+      id, kind: 'FEATURE', path: `features/${name.trim().toLowerCase().replace(/\s+/g, '-').slice(0, 60)}`,
+      symbol: name.trim().slice(0, 80), description: description.slice(0, 300),
+      hash: id, summary: description.slice(0, 200), auto: false,
+    };
+    const newLinks: CodeLink[] = members.map((m) => ({ id: `link_${id}_${m}`.slice(0, 60), source: id, target: m, kind: 'belongs-to' }));
+    set((s) => {
+      const entities = [...s.entities, ent];
+      const links = [...s.links, ...newLinks];
+      return {
+        entities, links,
+        repo: s.repo ? { ...s.repo, graphHash: graphHash(entities, links) } : s.repo,
+      };
+    });
+    return id;
+  },
 
   applyProposal: (newEntities, newLinks) =>
     set((s) => ({
@@ -108,12 +167,8 @@ export const useCodeStore = create<CodeState>((set, get) => ({
   mergeRaw: (raw) => {
     const s = get();
     const { entities, links, snippets, diff } = mergeIndexed(s.entities, s.links, s.snippets, raw);
-    const alive = new Set(entities.map((e) => e.id));
-    const features = s.features
-      .map((f) => ({ ...f, members: f.members.filter((m) => alive.has(m)) }))
-      .filter((f) => f.members.length > 0);
     set({
-      entities, links, snippets, features,
+      entities, links, snippets,
       repo: s.repo ? {
         ...s.repo,
         fileCount: new Set(entities.filter((e) => e.kind === 'FILE').map((e) => e.path)).size,
@@ -125,7 +180,7 @@ export const useCodeStore = create<CodeState>((set, get) => ({
   },
 
   clear: () =>
-    set({ repo: null, entities: [], links: [], features: [], snippets: {}, selectedId: null, focusedFolder: null, screen: 'ingest', error: null }),
+    set({ repo: null, entities: [], links: [], snippets: {}, selectedId: null, focusedFolder: null, screen: 'ingest', error: null }),
 }));
 
 /** BFS closure around seed entity ids (1-2 hops) — used for LLM context packs + export. */

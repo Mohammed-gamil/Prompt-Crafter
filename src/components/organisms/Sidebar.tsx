@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Cube, 
-  Wrench, 
-  Books, 
-  Lightning, 
-  Sparkle, 
-  MagnifyingGlass, 
-  Plus, 
-  CaretRight, 
-  Play, 
-  X 
+import {
+  Cube,
+  Wrench,
+  Books,
+  Lightning,
+  Sparkle,
+  MagnifyingGlass,
+  Plus,
+  CaretRight,
+  CaretLeft,
+  Play,
+  X
 } from '@phosphor-icons/react';
 import { PALETTE_ITEMS } from '../../presets';
 import { compile } from '../../compiler';
@@ -40,7 +41,7 @@ const CATEGORY_BADGE: Record<string, string> = {
 
 const SPRING_TRANSITION = { type: 'spring', stiffness: 300, damping: 30 } as const;
 
-export default function Sidebar() {
+export default function Sidebar({ onCollapse }: { onCollapse?: () => void }) {
   const addNode               = useAppStore((s) => s.addNode);
   const nodes                 = useAppStore((s) => s.nodes);
   const edges                 = useAppStore((s) => s.edges);
@@ -120,12 +121,20 @@ export default function Sidebar() {
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="px-5 py-5 flex-shrink-0 border-b border-zinc-800">
-          <h1 className="text-base font-semibold text-white flex items-center gap-2.5">
-            <span className="text-blue-500 flex items-center justify-center bg-blue-500/10 w-7 h-7 rounded-md border border-blue-500/20">
-              <Cube size={15} weight="duotone" />
-            </span>
-            Prompt Crafter
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-base font-semibold text-white flex items-center gap-2.5">
+              <span className="text-blue-500 flex items-center justify-center bg-blue-500/10 w-7 h-7 rounded-md border border-blue-500/20">
+                <Cube size={15} weight="duotone" />
+              </span>
+              Prompt Crafter
+            </h1>
+            {onCollapse && (
+              <button onClick={onCollapse} title="Hide sidebar"
+                className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900 transition-colors">
+                <CaretLeft size={14} weight="bold" />
+              </button>
+            )}
+          </div>
           <p className="text-[11px] text-zinc-500 mt-2">Node palette</p>
         </div>
 

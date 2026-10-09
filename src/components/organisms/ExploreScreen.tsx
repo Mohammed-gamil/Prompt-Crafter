@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowsClockwise, Export } from '@phosphor-icons/react';
+import { ArrowsClockwise, Export, Gear } from '@phosphor-icons/react';
 import { useCodeStore } from '../../codeIndex/store';
 import { filesFromDirectoryUpload } from '../../codeIndex/ingest';
 import { toast } from '../../toast';
@@ -8,32 +8,37 @@ import CodeGraphCanvas from './CodeGraphCanvas';
 import AddFeatureBar from './AddFeatureBar';
 import CodeActions from '../molecules/CodeActions';
 import ExportModal from './ExportModal';
+import SettingsModal from './SettingsModal';
 
 export default function ExploreScreen() {
   const view = useCodeStore((s) => s.view);
   const setView = useCodeStore((s) => s.setView);
+  const repo = useCodeStore((s) => s.repo);
   const entities = useCodeStore((s) => s.entities);
   const links = useCodeStore((s) => s.links);
   const setScreen = useCodeStore((s) => s.setScreen);
   const clear = useCodeStore((s) => s.clear);
+  const setLevel = useCodeStore((s) => s.setLevel);
   const focusedFolder = useCodeStore((s) => s.focusedFolder);
   const focusFolder = useCodeStore((s) => s.focusFolder);
   const selectedId = useCodeStore((s) => s.selectedId);
-  const features = useCodeStore((s) => s.features);
   const [exportOpen, setExportOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const mergeRaw = useCodeStore((s) => s.mergeRaw);
   const syncRef = useRef<HTMLInputElement>(null);
 
   const exportFeatureId =
     entities.find((e) => e.id === selectedId && (e.kind === 'FEATURE' || e.kind === 'FEATURE_PROPOSED'))?.id
-    ?? features[0]?.id
     ?? entities.find((e) => e.kind === 'FEATURE' || e.kind === 'FEATURE_PROPOSED')?.id
     ?? null;
 
   return (
     <div className="h-full w-full flex flex-col bg-zinc-950">
       {/* top bar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800 shrink-0">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800 shrink-0 flex-wrap">
+        <span className="text-xs font-medium text-zinc-200 font-mono truncate max-w-48" title={repo?.name}>
+          {repo?.name}{repo?.branch ? <span className="text-zinc-600">:{repo.branch}</span> : null}
+        </span>
         <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-zinc-900 border border-zinc-800">
           {(['structure', 'feature'] as const).map((v) => (
             <button key={v} onClick={() => setView(v)}
@@ -43,7 +48,7 @@ export default function ExploreScreen() {
           ))}
         </div>
         {focusedFolder && view === 'structure' && (
-          <button onClick={() => focusFolder(null)}
+          <button onClick={() => { focusFolder(null); setLevel('folder'); }}
             className="px-2.5 py-1 rounded-md text-xs text-zinc-400 border border-zinc-800 hover:border-zinc-600 font-mono">
             ↑ {focusedFolder}
           </button>
@@ -73,6 +78,10 @@ export default function ExploreScreen() {
             }}
           />
           <span className="text-[11px] font-mono text-zinc-600">{entities.length} nodes · {links.length} edges</span>
+          <button onClick={() => setSettingsOpen(true)} title="Settings — LLM API key and model"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-colors">
+            <Gear size={15} weight="bold" />
+          </button>
           <button onClick={() => setScreen('prompt')} className="text-xs text-zinc-500 hover:text-zinc-200 transition-colors">Canvas</button>
           <button onClick={() => { clear(); }} className="text-xs text-zinc-600 hover:text-red-400 transition-colors">New import</button>
         </div>
@@ -83,6 +92,7 @@ export default function ExploreScreen() {
         <CodeGraphCanvas />
       </div>
       {exportOpen && exportFeatureId && <ExportModal featureId={exportFeatureId} onClose={() => setExportOpen(false)} />}
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }
